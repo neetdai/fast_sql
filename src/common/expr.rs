@@ -338,8 +338,7 @@ impl PrattParserTrait for Expr {
                         like.map(|e| (Expr::Like(e), Flow::Continue))
                     }
                     Some(&TokenKind::Keyword(Keyword::Exists)) => {
-                        let exists =
-                            ExistsExpr::build(true, token_table, cursor);
+                        let exists = ExistsExpr::build(true, token_table, cursor);
                         exists.map(|e| (Expr::Exists(Box::new(e)), Flow::Continue))
                     }
                     _ => Err(ParserError::SyntaxError(*cursor, *cursor)),
@@ -347,13 +346,12 @@ impl PrattParserTrait for Expr {
             }
             Some(&TokenKind::Keyword(Keyword::Is)) => {
                 *cursor += 1;
-                let is_not =
-                    if maybe_kind(token_table, cursor, &TokenKind::Keyword(Keyword::Not)) {
-                        *cursor += 1;
-                        true
-                    } else {
-                        false
-                    };
+                let is_not = if maybe_kind(token_table, cursor, &TokenKind::Keyword(Keyword::Not)) {
+                    *cursor += 1;
+                    true
+                } else {
+                    false
+                };
                 expect_kind(token_table, cursor, &TokenKind::Keyword(Keyword::Null))?;
                 *cursor += 1;
                 Ok((
@@ -547,7 +545,6 @@ impl FromToken for FunctionCall {
     where
         Self: Sized,
     {
-        
         let first = token_table
             .get_kind(*cursor)
             .map(|kind| kind == &TokenKind::Identifier)
@@ -564,12 +561,13 @@ impl FromToken for FunctionCall {
         let name_pos = *cursor;
         *cursor += 2;
 
-        let distinct = if let Some(TokenKind::Keyword(Keyword::Distinct)) = token_table.get_kind(*cursor) {
-            *cursor += 1;
-            true
-        } else {
-            false
-        };
+        let distinct =
+            if let Some(TokenKind::Keyword(Keyword::Distinct)) = token_table.get_kind(*cursor) {
+                *cursor += 1;
+                true
+            } else {
+                false
+            };
 
         let mut args = MiniVec::with_capacity(8);
         let mut is_comma = false;
@@ -867,10 +865,7 @@ pub struct WindowSpec {
 }
 
 impl WindowSpec {
-    pub(crate) fn build(
-        token_table: &TokenTable,
-        cursor: &mut usize,
-    ) -> Result<Self, ParserError> {
+    pub(crate) fn build(token_table: &TokenTable, cursor: &mut usize) -> Result<Self, ParserError> {
         expect_kind(token_table, cursor, &TokenKind::LeftParen)?;
         *cursor += 1;
 
@@ -885,8 +880,9 @@ impl WindowSpec {
                         Some(TokenKind::Comma) => {
                             *cursor += 1;
                         }
-                        Some(TokenKind::Keyword(Keyword::Order))
-                        | Some(TokenKind::RightParen) => break,
+                        Some(TokenKind::Keyword(Keyword::Order)) | Some(TokenKind::RightParen) => {
+                            break;
+                        }
                         Some(TokenKind::Identifier)
                         | Some(TokenKind::Number)
                         | Some(TokenKind::StringLiteral)
@@ -901,16 +897,18 @@ impl WindowSpec {
                 None
             };
 
-        let order_by =
-            if maybe_kind(token_table, cursor, &TokenKind::Keyword(Keyword::Order)) {
-                Some(Order::build(token_table, cursor)?)
-            } else {
-                None
-            };
+        let order_by = if maybe_kind(token_table, cursor, &TokenKind::Keyword(Keyword::Order)) {
+            Some(Order::build(token_table, cursor)?)
+        } else {
+            None
+        };
 
         expect_kind(token_table, cursor, &TokenKind::RightParen)?;
         *cursor += 1;
-        Ok(Self { partition_by, order_by })
+        Ok(Self {
+            partition_by,
+            order_by,
+        })
     }
 }
 
@@ -1504,7 +1502,7 @@ mod test {
         token_table.push(TokenKind::Number, 3, 4);
         token_table.push(TokenKind::RightParen, 5, 5);
 
-         let mut cursor = 0;
+        let mut cursor = 0;
         let expr = Expr::class_function_call(&token_table, &mut cursor).unwrap();
         assert_eq!(
             expr,
@@ -1909,7 +1907,7 @@ mod test {
     #[test]
     fn test_is_null() {
         let mut token_table = TokenTable::with_capacity(3);
-        token_table.push(TokenKind::Identifier, 0, 3);     // col
+        token_table.push(TokenKind::Identifier, 0, 3); // col
         token_table.push(TokenKind::Keyword(Keyword::Is), 4, 5); // IS
         token_table.push(TokenKind::Keyword(Keyword::Null), 6, 9); // NULL
 
@@ -1930,7 +1928,7 @@ mod test {
     #[test]
     fn test_is_not_null() {
         let mut token_table = TokenTable::with_capacity(4);
-        token_table.push(TokenKind::Identifier, 0, 3);     // col
+        token_table.push(TokenKind::Identifier, 0, 3); // col
         token_table.push(TokenKind::Keyword(Keyword::Is), 4, 5); // IS
         token_table.push(TokenKind::Keyword(Keyword::Not), 6, 8); // NOT
         token_table.push(TokenKind::Keyword(Keyword::Null), 9, 12); // NULL
@@ -1987,9 +1985,9 @@ mod test {
         token_table.push(TokenKind::Keyword(Keyword::Select), 7, 12);
         token_table.push(TokenKind::Multiply, 13, 13);
         token_table.push(TokenKind::Keyword(Keyword::From), 14, 17);
-        token_table.push(TokenKind::Identifier, 18, 22);   // users
+        token_table.push(TokenKind::Identifier, 18, 22); // users
         token_table.push(TokenKind::Keyword(Keyword::Where), 23, 27);
-        token_table.push(TokenKind::Identifier, 28, 29);   // id
+        token_table.push(TokenKind::Identifier, 28, 29); // id
         token_table.push(TokenKind::Equal, 30, 30);
         token_table.push(TokenKind::Number, 31, 31);
         token_table.push(TokenKind::RightParen, 32, 32);

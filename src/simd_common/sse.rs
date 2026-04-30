@@ -163,18 +163,16 @@ impl SimdTrait for Sse {
         let mut pos = start_pos;
         let len = slice.len();
 
-        let lanes = matches.map(|m| unsafe {
-            x86_64::_mm_set1_epi8(m.cast_signed())
-        });
-
         unsafe {
+            let lanes = matches.map(|m| x86_64::_mm_set1_epi8(m.cast_signed()));
+
             while pos + Self::LENGTH <= len {
                 let ptr = slice.as_ptr().add(pos).cast();
                 let chunk = x86_64::_mm_loadu_si128(ptr);
 
                 let mut all_mask: u32 = 0;
-                for i in 0..N {
-                    let eq = x86_64::_mm_cmpeq_epi8(chunk, lanes[i]);
+                for lane in lanes.iter().take(N) {
+                    let eq = x86_64::_mm_cmpeq_epi8(chunk, *lane);
                     all_mask |= x86_64::_mm_movemask_epi8(eq) as u32;
                 }
 
@@ -207,18 +205,16 @@ impl SimdTrait for Sse {
         let mut pos = start_pos;
         let len = slice.len();
 
-        let lanes = sequence.map(|m| unsafe {
-            x86_64::_mm_set1_epi8(m.cast_signed())
-        });
-
         unsafe {
+            let lanes = sequence.map(|m| x86_64::_mm_set1_epi8(m.cast_signed()));
+
             while pos + Self::LENGTH <= len {
                 let ptr = slice.as_ptr().add(pos).cast();
                 let chunk = x86_64::_mm_loadu_si128(ptr);
 
                 let mut mask: u32 = 0xFFFF;
-                for i in 0..N {
-                    let eq = x86_64::_mm_cmpeq_epi8(chunk, lanes[i]);
+                for (i, lane) in lanes.iter().enumerate().take(N) {
+                    let eq = x86_64::_mm_cmpeq_epi8(chunk, *lane);
                     mask &= (x86_64::_mm_movemask_epi8(eq) as u32) >> i;
                 }
 
@@ -233,7 +229,7 @@ impl SimdTrait for Sse {
         // scalar tail
         let end = len.saturating_sub(N - 1);
         while pos < end {
-            if &slice[pos..pos + N] == &sequence[..] {
+            if slice[pos..pos + N] == sequence[..] {
                 return (start_pos, pos as isize);
             }
             pos += 1;

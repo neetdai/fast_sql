@@ -1,5 +1,3 @@
-
-
 use crate::{
     error::ParserError,
     find_consecutive_in_range,
@@ -251,8 +249,7 @@ impl<'a> Lexer<'a> {
                 Some(b'o') | Some(b'O') => {
                     self.position += 2;
                     let oct_start = self.position;
-                    let (_, end) =
-                        mixed_match(self.inner, [(b'0', b'7')], [b'_'], oct_start);
+                    let (_, end) = mixed_match(self.inner, [(b'0', b'7')], [b'_'], oct_start);
                     if end == -1 {
                         return Err(ParserError::InvalidToken(oct_start, oct_start));
                     }
@@ -262,8 +259,7 @@ impl<'a> Lexer<'a> {
                 Some(b'b') | Some(b'B') => {
                     self.position += 2;
                     let bin_start = self.position;
-                    let (_, end) =
-                        mixed_match(self.inner, [(b'0', b'1')], [b'_'], bin_start);
+                    let (_, end) = mixed_match(self.inner, [(b'0', b'1')], [b'_'], bin_start);
                     if end == -1 {
                         return Err(ParserError::InvalidToken(bin_start, bin_start));
                     }
@@ -338,7 +334,7 @@ impl<'a> Lexer<'a> {
     }
 
     fn scan_unsigned_number(&mut self) -> Result<Option<(TokenKind, usize, usize)>, ParserError> {
-        let (start, end) = find_consecutive_in_range(&self.inner, (b'0', b'9'), self.position);
+        let (start, end) = find_consecutive_in_range(self.inner, (b'0', b'9'), self.position);
         if end == -1 {
             Ok(None)
         } else {
@@ -630,7 +626,7 @@ impl<'a> Lexer<'a> {
                 _ => {
                     return Err(ParserError::InvalidToken(start, end));
                 }
-            }
+            },
             _ => return Err(ParserError::InvalidToken(start, end)),
         };
         Ok(())

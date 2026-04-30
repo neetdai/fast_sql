@@ -15,6 +15,5 @@ pub use ast::{
 };
 
 pub(crate) use simd_common::{
-    find_consecutive_in_range, longest_consecutive_matching, skip_until_match,
-    skip_until_sequence,
+    find_consecutive_in_range, longest_consecutive_matching, skip_until_match, skip_until_sequence,
 };

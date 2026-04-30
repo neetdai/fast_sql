@@ -1,22 +1,14 @@
-use crate::{
-    Statement,
-    error::ParserError,
-    keyword::KeywordMap,
-    lexer::Lexer,
-};
-use bumpalo::Bump;
+use crate::{Statement, error::ParserError, keyword::KeywordMap, lexer::Lexer};
 use simdutf8::basic::from_utf8;
 
 #[derive(Debug)]
 pub struct Parser {
-    arena: Bump,
     keyword_map: KeywordMap,
 }
 
 impl Parser {
     pub fn new() -> Result<Self, ParserError> {
         Ok(Self {
-            arena: Bump::new(),
             keyword_map: KeywordMap::new()
                 .map_err(|err| ParserError::AhoCorasickBuild(err.to_string()))?,
         })

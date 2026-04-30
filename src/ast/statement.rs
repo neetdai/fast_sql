@@ -1,4 +1,3 @@
-
 use super::{insert::InsertStatement, update::UpdateStatement};
 use crate::{
     ast::{cte::Cte, delete::DeleteStatement, query::Query},

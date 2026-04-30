@@ -1,9 +1,6 @@
 use std::fmt::Debug;
 
-use crate::{
-    ParserError,
-    token::TokenTable,
-};
+use crate::{ParserError, token::TokenTable};
 
 pub(crate) trait PrattOutput<I>
 where

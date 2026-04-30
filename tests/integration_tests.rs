@@ -36,7 +36,10 @@ fn parse_select_from_and_join() {
 #[test]
 fn parse_select_star_from_table() {
     let p = Parser::new().expect("failed to initialize Parser");
-    assert!(p.parse("SELECT * FROM users").is_ok(), "SELECT * FROM should parse");
+    assert!(
+        p.parse("SELECT * FROM users").is_ok(),
+        "SELECT * FROM should parse"
+    );
 }
 
 #[test]
@@ -50,7 +53,10 @@ fn parse_select_with_where() {
 fn parse_select_with_where_and_conditions() {
     let p = Parser::new().expect("failed to initialize Parser");
     let sql = "SELECT * FROM orders WHERE status = 'active' AND total >= 100";
-    assert!(p.parse(sql).is_ok(), "SELECT with complex WHERE should parse");
+    assert!(
+        p.parse(sql).is_ok(),
+        "SELECT with complex WHERE should parse"
+    );
 }
 
 #[test]
@@ -78,14 +84,20 @@ fn parse_select_with_limit() {
 fn parse_select_with_all_clauses() {
     let p = Parser::new().expect("failed to initialize Parser");
     let sql = "SELECT category, COUNT(*) AS cnt FROM products WHERE price > 0 GROUP BY category HAVING cnt > 1 ORDER BY cnt DESC LIMIT 5";
-    assert!(p.parse(sql).is_ok(), "complex SELECT with all clauses should parse");
+    assert!(
+        p.parse(sql).is_ok(),
+        "complex SELECT with all clauses should parse"
+    );
 }
 
 #[test]
 fn parse_select_with_subquery_in_from() {
     let p = Parser::new().expect("failed to initialize Parser");
     let sql = "SELECT * FROM (SELECT id, name FROM users) AS u";
-    assert!(p.parse(sql).is_ok(), "SELECT with subquery in FROM should parse");
+    assert!(
+        p.parse(sql).is_ok(),
+        "SELECT with subquery in FROM should parse"
+    );
 }
 
 #[test]
@@ -162,21 +174,30 @@ fn parse_select_with_field_alias() {
 fn parse_select_with_table_prefix() {
     let p = Parser::new().expect("failed to initialize Parser");
     let sql = "SELECT users.id, users.name FROM users";
-    assert!(p.parse(sql).is_ok(), "SELECT with table prefix should parse");
+    assert!(
+        p.parse(sql).is_ok(),
+        "SELECT with table prefix should parse"
+    );
 }
 
 #[test]
 fn parse_select_with_arithmetic_expression() {
     let p = Parser::new().expect("failed to initialize Parser");
     let sql = "SELECT price * quantity AS total FROM order_items";
-    assert!(p.parse(sql).is_ok(), "SELECT with arithmetic expression should parse");
+    assert!(
+        p.parse(sql).is_ok(),
+        "SELECT with arithmetic expression should parse"
+    );
 }
 
 #[test]
 fn parse_select_with_parenthesized_expression() {
     let p = Parser::new().expect("failed to initialize Parser");
     let sql = "SELECT * FROM items WHERE (price + tax) * 1.1 > 100";
-    assert!(p.parse(sql).is_ok(), "SELECT with parenthesized expression should parse");
+    assert!(
+        p.parse(sql).is_ok(),
+        "SELECT with parenthesized expression should parse"
+    );
 }
 
 // ============================================================================
@@ -194,14 +215,20 @@ fn parse_basic_insert() {
 fn parse_insert_multiple_rows() {
     let p = Parser::new().expect("failed to initialize Parser");
     let sql = "INSERT INTO users (id, name) VALUES (1, 'Alice'), (2, 'Bob'), (3, 'Charlie')";
-    assert!(p.parse(sql).is_ok(), "INSERT with multiple rows should parse");
+    assert!(
+        p.parse(sql).is_ok(),
+        "INSERT with multiple rows should parse"
+    );
 }
 
 #[test]
 fn parse_insert_single_column() {
     let p = Parser::new().expect("failed to initialize Parser");
     let sql = "INSERT INTO logs (message) VALUES ('Hello World')";
-    assert!(p.parse(sql).is_ok(), "INSERT with single column should parse");
+    assert!(
+        p.parse(sql).is_ok(),
+        "INSERT with single column should parse"
+    );
 }
 
 // ============================================================================
@@ -219,7 +246,10 @@ fn parse_basic_update() {
 fn parse_update_multiple_columns() {
     let p = Parser::new().expect("failed to initialize Parser");
     let sql = "UPDATE products SET price = 19.99, stock = 100 WHERE id = 5";
-    assert!(p.parse(sql).is_ok(), "UPDATE with multiple columns should parse");
+    assert!(
+        p.parse(sql).is_ok(),
+        "UPDATE with multiple columns should parse"
+    );
 }
 
 #[test]
@@ -244,7 +274,10 @@ fn parse_basic_delete() {
 fn parse_delete_with_condition() {
     let p = Parser::new().expect("failed to initialize Parser");
     let sql = "DELETE FROM orders WHERE status = 'cancelled' AND total < 0";
-    assert!(p.parse(sql).is_ok(), "DELETE with complex condition should parse");
+    assert!(
+        p.parse(sql).is_ok(),
+        "DELETE with complex condition should parse"
+    );
 }
 
 #[test]
@@ -294,7 +327,10 @@ fn parse_select_except() {
 fn parse_complex_expression_and_or_not() {
     let p = Parser::new().expect("failed to initialize Parser");
     let sql = "SELECT * FROM t WHERE (a > 1 AND b < 2) OR (c = 3 AND d != 4)";
-    assert!(p.parse(sql).is_ok(), "complex AND/OR expression should parse");
+    assert!(
+        p.parse(sql).is_ok(),
+        "complex AND/OR expression should parse"
+    );
 }
 
 #[test]
@@ -325,10 +361,7 @@ fn parse_not_like_expression() {
 #[test]
 fn parse_empty_input() {
     let p = Parser::new().expect("failed to initialize Parser");
-    assert!(
-        p.parse("").is_err(),
-        "empty input should fail to parse"
-    );
+    assert!(p.parse("").is_err(), "empty input should fail to parse");
 }
 
 #[test]
@@ -343,19 +376,28 @@ fn parse_whitespace_only() {
 #[test]
 fn parse_lowercase_keyword() {
     let p = Parser::new().expect("failed to initialize Parser");
-    assert!(p.parse("select * from users").is_ok(), "lowercase keywords should parse");
+    assert!(
+        p.parse("select * from users").is_ok(),
+        "lowercase keywords should parse"
+    );
 }
 
 #[test]
 fn parse_uppercase_keyword() {
     let p = Parser::new().expect("failed to initialize Parser");
-    assert!(p.parse("SELECT * FROM USERS").is_ok(), "uppercase keywords should parse");
+    assert!(
+        p.parse("SELECT * FROM USERS").is_ok(),
+        "uppercase keywords should parse"
+    );
 }
 
 #[test]
 fn parse_mixed_case_keyword() {
     let p = Parser::new().expect("failed to initialize Parser");
-    assert!(p.parse("Select * From users").is_ok(), "mixed-case keywords should parse");
+    assert!(
+        p.parse("Select * From users").is_ok(),
+        "mixed-case keywords should parse"
+    );
 }
 
 // ============================================================================
@@ -436,7 +478,10 @@ fn parse_comment_handling_dash() {
 fn parse_function_call_with_expression() {
     let p = Parser::new().expect("failed to initialize Parser");
     let sql = "SELECT CONCAT(first_name, ' ', last_name) AS full_name FROM employees";
-    assert!(p.parse(sql).is_ok(), "function call with expression should parse");
+    assert!(
+        p.parse(sql).is_ok(),
+        "function call with expression should parse"
+    );
 }
 
 #[test]
@@ -458,7 +503,10 @@ JOIN products p ON oi.product_id = p.id";
 fn parse_cte_basic() {
     let p = Parser::new().expect("failed to initialize Parser");
     let sql = "WITH cte AS (SELECT id FROM users) SELECT * FROM cte";
-    assert!(p.parse(sql).is_ok(), "basic WITH ... AS SELECT should parse");
+    assert!(
+        p.parse(sql).is_ok(),
+        "basic WITH ... AS SELECT should parse"
+    );
 }
 
 #[test]
@@ -541,7 +589,8 @@ fn parse_window_function_row_number() {
 #[test]
 fn parse_window_function_with_partition() {
     let p = Parser::new().expect("failed to initialize Parser");
-    let sql = "SELECT ROW_NUMBER() OVER (PARTITION BY dept ORDER BY salary DESC) as rn FROM employees";
+    let sql =
+        "SELECT ROW_NUMBER() OVER (PARTITION BY dept ORDER BY salary DESC) as rn FROM employees";
     assert!(p.parse(sql).is_ok(), "OVER with PARTITION BY should parse");
 }
 
@@ -549,7 +598,10 @@ fn parse_window_function_with_partition() {
 fn parse_window_function_multiple() {
     let p = Parser::new().expect("failed to initialize Parser");
     let sql = "SELECT RANK() OVER (ORDER BY price) as rk, DENSE_RANK() OVER (ORDER BY price) as dr FROM products";
-    assert!(p.parse(sql).is_ok(), "multiple window functions should parse");
+    assert!(
+        p.parse(sql).is_ok(),
+        "multiple window functions should parse"
+    );
 }
 
 #[test]
@@ -563,7 +615,10 @@ fn parse_window_function_benchmark_sql20() {
 fn parse_window_function_no_args() {
     let p = Parser::new().expect("failed to initialize Parser");
     let sql = "SELECT RANK() OVER (ORDER BY score DESC) FROM students";
-    assert!(p.parse(sql).is_ok(), "window function with no args should parse");
+    assert!(
+        p.parse(sql).is_ok(),
+        "window function with no args should parse"
+    );
 }
 
 // ============================================================================
@@ -595,7 +650,10 @@ fn parse_block_comment_multiline() {
 fn parse_unterminated_block_comment() {
     let p = Parser::new().expect("failed to initialize Parser");
     let sql = "SELECT /* no end";
-    assert!(p.parse(sql).is_err(), "unterminated block comment should error");
+    assert!(
+        p.parse(sql).is_err(),
+        "unterminated block comment should error"
+    );
 }
 
 #[test]

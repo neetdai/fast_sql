@@ -3,9 +3,7 @@ use minivec::MiniVec;
 use crate::{
     ParserError,
     ast::query::Query,
-    common::{
-        utils::{expect_kind, maybe_kind},
-    },
+    common::utils::{expect_kind, maybe_kind},
     keyword::Keyword,
     token::{TokenKind, TokenTable},
 };
@@ -36,7 +34,9 @@ impl CteBinding {
             let mut cols = MiniVec::new();
             loop {
                 match token_table.get_kind(*cursor) {
-                    Some(TokenKind::Comma) => { *cursor += 1; }
+                    Some(TokenKind::Comma) => {
+                        *cursor += 1;
+                    }
                     Some(TokenKind::RightParen) => {
                         *cursor += 1;
                         break;
@@ -63,19 +63,21 @@ impl CteBinding {
         expect_kind(token_table, cursor, &TokenKind::RightParen)?;
         *cursor += 1;
 
-        Ok(CteBinding { name, columns, query })
+        Ok(CteBinding {
+            name,
+            columns,
+            query,
+        })
     }
 }
 
 impl Cte {
-    pub(crate) fn build(
-        token_table: &TokenTable,
-        cursor: &mut usize,
-    ) -> Result<Self, ParserError> {
+    pub(crate) fn build(token_table: &TokenTable, cursor: &mut usize) -> Result<Self, ParserError> {
         expect_kind(token_table, cursor, &TokenKind::Keyword(Keyword::With))?;
         *cursor += 1;
 
-        let recursive = if maybe_kind(token_table, cursor, &TokenKind::Keyword(Keyword::Recursive)) {
+        let recursive = if maybe_kind(token_table, cursor, &TokenKind::Keyword(Keyword::Recursive))
+        {
             *cursor += 1;
             true
         } else {
@@ -99,6 +101,9 @@ impl Cte {
             return Err(ParserError::SyntaxError(*cursor, *cursor));
         }
 
-        Ok(Cte { recursive, bindings })
+        Ok(Cte {
+            recursive,
+            bindings,
+        })
     }
 }

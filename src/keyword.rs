@@ -1,7 +1,6 @@
 use aho_corasick::{AhoCorasick, AhoCorasickBuilder, BuildError, MatchKind};
 use strum::{Display, VariantArray};
 
-
 #[derive(
     Debug, PartialEq, Eq, Hash, Clone, Copy, Display, strum::VariantArray, strum::AsRefStr,
 )]

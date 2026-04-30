@@ -63,11 +63,8 @@ impl Order {
                     let nulls_order =
                         if maybe_kind(token_table, cursor, &TokenKind::Keyword(Keyword::Nulls)) {
                             *cursor += 1;
-                            if maybe_kind(
-                                token_table,
-                                cursor,
-                                &TokenKind::Keyword(Keyword::First),
-                            ) {
+                            if maybe_kind(token_table, cursor, &TokenKind::Keyword(Keyword::First))
+                            {
                                 *cursor += 1;
                                 Some(NullsOrder::First)
                             } else if maybe_kind(

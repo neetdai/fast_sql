@@ -39,12 +39,13 @@ impl SelectStatement {
         expect_kind(token_table, cursor, &TokenKind::Keyword(Keyword::Select))?;
         *cursor += 1;
 
-        let distinct = if let Some(TokenKind::Keyword(Keyword::Distinct)) = token_table.get_kind(*cursor) {
-            *cursor += 1;
-            true
-        } else {
-            false
-        };
+        let distinct =
+            if let Some(TokenKind::Keyword(Keyword::Distinct)) = token_table.get_kind(*cursor) {
+                *cursor += 1;
+                true
+            } else {
+                false
+            };
 
         let mut columns = Vec::new();
         loop {

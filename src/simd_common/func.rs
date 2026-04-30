@@ -84,8 +84,7 @@ fn find_consecutive_in_range_basic(
     let len = slice.len();
     let mut end_pos = -1;
 
-    for index in start_pos..len {
-        let c = &slice[index];
+    for (index, c) in slice.iter().enumerate().take(len).skip(start_pos) {
         if *c >= matches.0 && *c <= matches.1 {
             end_pos = index.cast_signed();
         } else {
@@ -133,8 +132,7 @@ fn longest_consecutive_matching_basic<const N: usize>(
     let len = slice.len();
     let mut end_pos = -1;
 
-    for index in start_pos..len {
-        let c = &slice[index];
+    for (index, c) in slice.iter().enumerate().take(len).skip(start_pos) {
         // dbg!(c);
         if matches.contains(c) {
             end_pos = index.cast_signed();
@@ -218,8 +216,7 @@ fn mixed_match_basic<const N1: usize, const N2: usize>(
     let len = slice.len();
     // dbg!(start_pos);
 
-    for index in start_pos..len {
-        let c = &slice[index];
+    for (index, c) in slice.iter().enumerate().take(len).skip(start_pos) {
         // dbg!(c);
         let in_range = match_range.iter().any(|(a, b)| *c >= *a && *c <= *b);
         if in_range || matches2.contains(c) {
@@ -239,8 +236,8 @@ fn skip_until_match_basic<const N: usize>(
     if start_pos >= slice.len() {
         return (start_pos, -1);
     }
-    for i in start_pos..slice.len() {
-        if matches.contains(&slice[i]) {
+    for (i, item) in slice.iter().enumerate().skip(start_pos) {
+        if matches.contains(item) {
             return (start_pos, i as isize);
         }
     }
@@ -257,7 +254,7 @@ fn skip_until_sequence_basic<const N: usize>(
     }
     let end = slice.len().saturating_sub(N - 1);
     for i in start_pos..end {
-        if &slice[i..i + N] == &sequence[..] {
+        if slice[i..i + N] == sequence[..] {
             return (start_pos, i as isize);
         }
     }
