@@ -330,7 +330,7 @@ impl PrattParserTrait for Expr {
                         between.map(|e| (Expr::Between(e), Flow::Continue))
                     }
                     Some(&TokenKind::Keyword(Keyword::In)) => {
-                        let in_expr = In::build(false, Box::new(left), token_table, cursor);
+                        let in_expr = In::build(true, Box::new(left), token_table, cursor);
                         in_expr.map(|e| (Expr::In(e), Flow::Continue))
                     }
                     Some(&TokenKind::Keyword(Keyword::Like)) => {
