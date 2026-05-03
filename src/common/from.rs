@@ -201,7 +201,7 @@ mod tests {
         for (kind, start, end) in tokens {
             table.push(
                 kind,
-                String::from_utf8_lossy(&source.as_bytes()[start..=end]),
+                unsafe { str::from_utf8_unchecked(&source.as_bytes()[start..=end]) },
             );
         }
         table
@@ -219,7 +219,7 @@ mod tests {
                 name: None,
                 value: Expr::Field(Field {
                     prefix: None,
-                    name: Cow::Borrowed("users"),
+                    name: "users",
                 }),
             }))
         );
@@ -237,10 +237,10 @@ mod tests {
         assert_eq!(
             result,
             From::Table(Table::Name(Alias {
-                name: Some(Cow::Borrowed("u")),
+                name: Some("u"),
                 value: Expr::Field(Field {
                     prefix: None,
-                    name: Cow::Borrowed("users"),
+                    name: "users",
                 }),
             }))
         );
@@ -267,11 +267,11 @@ mod tests {
             op: BinaryOperator::Equal,
             left: Expr::Field(Field {
                 prefix: None,
-                name: Cow::Borrowed("user_id"),
+                name: "user_id",
             }),
             right: Expr::Field(Field {
                 prefix: None,
-                name: Cow::Borrowed("user_id"),
+                name: "user_id",
             }),
         }));
 
@@ -288,7 +288,7 @@ mod tests {
                     name: None,
                     value: Expr::Field(Field {
                         prefix: None,
-                        name: Cow::Borrowed("users")
+                        name: "users"
                     })
                 })
             );
@@ -298,7 +298,7 @@ mod tests {
                     name: None,
                     value: Expr::Field(Field {
                         prefix: None,
-                        name: Cow::Borrowed("orders")
+                        name: "orders"
                     })
                 })
             );
@@ -351,14 +351,14 @@ mod tests {
                     name: None,
                     value: Expr::Field(Field {
                         prefix: None,
-                        name: Cow::Borrowed("u"),
+                        name: "u",
                     }),
                 }),
                 right: Table::Name(Alias {
                     name: None,
                     value: Expr::Field(Field {
                         prefix: None,
-                        name: Cow::Borrowed("o"),
+                        name: "o",
                     }),
                 }),
             }
@@ -383,8 +383,8 @@ mod tests {
             From::Table(Table::Name(Alias {
                 name: None,
                 value: Expr::Field(Field {
-                    prefix: Some(Cow::Borrowed("users")),
-                    name: Cow::Borrowed("id")
+                    prefix: Some("users"),
+                    name: "id"
                 })
             }))
         );

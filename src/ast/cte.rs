@@ -1,4 +1,3 @@
-use std::borrow::Cow;
 
 use minivec::MiniVec;
 
@@ -12,8 +11,8 @@ use crate::{
 
 #[derive(Debug, PartialEq)]
 pub struct CteBinding<'a> {
-    pub name: Cow<'a, str>,
-    pub columns: Option<MiniVec<Cow<'a, str>>>,
+    pub name: &'a  str,
+    pub columns: Option<MiniVec<&'a str>>,
     pub query: Box<Query<'a>>,
 }
 

@@ -1,4 +1,3 @@
-use std::borrow::Cow;
 
 use crate::{
     ParserError,
@@ -12,7 +11,7 @@ pub trait Aliasable<'a>: Sized {
 
 #[derive(Debug, PartialEq)]
 pub struct Alias<'a, T> {
-    pub name: Option<Cow<'a, str>>,
+    pub name: Option<&'a str>,
     pub value: T,
 }
 

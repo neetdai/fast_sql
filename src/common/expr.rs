@@ -399,8 +399,8 @@ impl<'a> Expr<'a> {
 
 #[derive(Debug, PartialEq)]
 pub struct Field<'a> {
-    pub prefix: Option<Cow<'a, str>>,
-    pub name: Cow<'a, str>,
+    pub prefix: Option<&'a str>,
+    pub name: &'a str,
 }
 
 impl<'a> Field<'a> {
@@ -442,7 +442,7 @@ impl<'a> Field<'a> {
 
 #[derive(Debug, PartialEq)]
 pub struct Star<'a> {
-    pub prefix: Option<Cow<'a, str>>,
+    pub prefix: Option<&'a str>,
 }
 
 impl<'a> Star<'a> {
@@ -484,7 +484,7 @@ impl<'a> Star<'a> {
 
 #[derive(Debug, PartialEq)]
 pub struct FunctionCall<'a> {
-    pub name: Cow<'a, str>,
+    pub name: &'a str,
     pub args: MiniVec<Expr<'a>>,
     pub distinct: bool,
 }
@@ -555,7 +555,7 @@ impl<'a> FunctionCall<'a> {
 
 #[derive(Debug, PartialEq)]
 pub struct StringLiteral<'a> {
-    pub value: Cow<'a, str>,
+    pub value: &'a str,
 }
 
 impl<'a> StringLiteral<'a> {
@@ -575,7 +575,7 @@ impl<'a> StringLiteral<'a> {
 
 #[derive(Debug, PartialEq)]
 pub struct NumericLiteral<'a> {
-    pub value: Cow<'a, str>,
+    pub value: &'a str,
 }
 
 impl<'a> NumericLiteral<'a> {
@@ -884,7 +884,6 @@ impl<'a> CaseExpr<'a> {
 
 #[cfg(test)]
 mod test {
-    use std::borrow::Cow;
 
     use minivec::mini_vec;
 
@@ -906,7 +905,7 @@ mod test {
         for (kind, start, end) in entries {
             table.push(
                 kind,
-                String::from_utf8_lossy(&source.as_bytes()[start..=end]),
+                unsafe { str::from_utf8_unchecked(&source.as_bytes()[start..=end])},
             );
         }
         table
@@ -928,8 +927,8 @@ mod test {
         assert_eq!(
             expr,
             Expr::Field(Field {
-                prefix: Some(Cow::Borrowed("ab")),
-                name: Cow::Borrowed("cd"),
+                prefix: Some("ab"),
+                name: "cd",
             })
         );
         assert_eq!(cursor, 3);
@@ -950,10 +949,10 @@ mod test {
         assert_eq!(
             alias,
             Alias {
-                name: Some(Cow::Borrowed("e")),
+                name: Some("e"),
                 value: Expr::Field(Field {
-                    prefix: Some(Cow::Borrowed("ab")),
-                    name: Cow::Borrowed("cd"),
+                    prefix: Some("ab"),
+                    name: "cd",
                 })
             }
         );
@@ -974,10 +973,10 @@ mod test {
         assert_eq!(
             alias2,
             Alias {
-                name: Some(Cow::Borrowed("e")),
+                name: Some("e"),
                 value: Expr::Field(Field {
-                    prefix: Some(Cow::Borrowed("ab")),
-                    name: Cow::Borrowed("cd"),
+                    prefix: Some("ab"),
+                    name: "cd",
                 })
             }
         );
@@ -1002,9 +1001,9 @@ mod test {
             expr,
             Expr::FunctionCall(FunctionCall {
                 distinct: false,
-                name: Cow::Borrowed("foo"),
+                name: "foo",
                 args: mini_vec![Expr::StringLiteral(StringLiteral {
-                    value: Cow::Borrowed("'hello'"),
+                    value: "'hello'",
                 })]
             })
         );
@@ -1030,13 +1029,13 @@ mod test {
         assert_eq!(
             expr,
             Expr::FunctionCall(FunctionCall {
-                name: Cow::Borrowed("bar"),
+                name: "bar",
                 args: mini_vec![
                     Expr::StringLiteral(StringLiteral {
-                        value: Cow::Borrowed("'x'")
+                        value: "'x'"
                     }),
                     Expr::StringLiteral(StringLiteral {
-                        value: Cow::Borrowed("'y'")
+                        value: "'y'"
                     }),
                 ],
                 distinct: false,
@@ -1083,15 +1082,15 @@ mod test {
             Expr::BinaryOp(Box::new(BinaryOp {
                 op: BinaryOperator::Add,
                 left: Expr::NumericLiteral(NumericLiteral {
-                    value: Cow::Borrowed("1")
+                    value: "1"
                 }),
                 right: Expr::BinaryOp(Box::new(BinaryOp {
                     op: BinaryOperator::Multiply,
                     left: Expr::NumericLiteral(NumericLiteral {
-                        value: Cow::Borrowed("2")
+                        value: "2"
                     }),
                     right: Expr::NumericLiteral(NumericLiteral {
-                        value: Cow::Borrowed("3")
+                        value: "3"
                     }),
                 })),
             }))
@@ -1121,14 +1120,14 @@ mod test {
                 left: Expr::BinaryOp(Box::new(BinaryOp {
                     op: BinaryOperator::Multiply,
                     left: Expr::NumericLiteral(NumericLiteral {
-                        value: Cow::Borrowed("1")
+                        value: "1"
                     }),
                     right: Expr::NumericLiteral(NumericLiteral {
-                        value: Cow::Borrowed("2")
+                        value: "2"
                     }),
                 })),
                 right: Expr::NumericLiteral(NumericLiteral {
-                    value: Cow::Borrowed("3")
+                    value: "3"
                 }),
             }))
         );
@@ -1159,14 +1158,14 @@ mod test {
                 left: Expr::BinaryOp(Box::new(BinaryOp {
                     op: BinaryOperator::Add,
                     left: Expr::NumericLiteral(NumericLiteral {
-                        value: Cow::Borrowed("1")
+                        value: "1"
                     }),
                     right: Expr::NumericLiteral(NumericLiteral {
-                        value: Cow::Borrowed("2")
+                        value: "2"
                     }),
                 })),
                 right: Expr::NumericLiteral(NumericLiteral {
-                    value: Cow::Borrowed("3")
+                    value: "3"
                 }),
             }))
         );
@@ -1191,10 +1190,10 @@ mod test {
             Expr::BinaryOp(Box::new(BinaryOp {
                 op: BinaryOperator::Divide,
                 left: Expr::NumericLiteral(NumericLiteral {
-                    value: Cow::Borrowed("1")
+                    value: "1"
                 }),
                 right: Expr::NumericLiteral(NumericLiteral {
-                    value: Cow::Borrowed("2")
+                    value: "2"
                 }),
             }))
         );
@@ -1216,10 +1215,10 @@ mod test {
             Expr::BinaryOp(Box::new(BinaryOp {
                 op: BinaryOperator::Mod,
                 left: Expr::NumericLiteral(NumericLiteral {
-                    value: Cow::Borrowed("1")
+                    value: "1"
                 }),
                 right: Expr::NumericLiteral(NumericLiteral {
-                    value: Cow::Borrowed("2")
+                    value: "2"
                 }),
             }))
         );
@@ -1244,10 +1243,10 @@ mod test {
                 op: BinaryOperator::Equal,
                 left: Expr::Field(Field {
                     prefix: None,
-                    name: Cow::Borrowed("id")
+                    name: "id"
                 }),
                 right: Expr::NumericLiteral(NumericLiteral {
-                    value: Cow::Borrowed("1")
+                    value: "1"
                 }),
             }))
         );
@@ -1270,10 +1269,10 @@ mod test {
                 op: BinaryOperator::NotEqual,
                 left: Expr::Field(Field {
                     prefix: None,
-                    name: Cow::Borrowed("id")
+                    name: "id"
                 }),
                 right: Expr::StringLiteral(StringLiteral {
-                    value: Cow::Borrowed("'x'")
+                    value: "'x'"
                 }),
             }))
         );
@@ -1302,16 +1301,16 @@ mod test {
                     op: BinaryOperator::And,
                     left: Expr::Field(Field {
                         prefix: None,
-                        name: Cow::Borrowed("a")
+                        name: "a"
                     }),
                     right: Expr::Field(Field {
                         prefix: None,
-                        name: Cow::Borrowed("b")
+                        name: "b"
                     }),
                 })),
                 right: Expr::Field(Field {
                     prefix: None,
-                    name: Cow::Borrowed("c")
+                    name: "c"
                 }),
             }))
         );
@@ -1327,7 +1326,7 @@ mod test {
         assert_eq!(
             expr,
             Expr::StringLiteral(StringLiteral {
-                value: Cow::Borrowed("'hello'")
+                value: "'hello'"
             })
         );
         assert_eq!(cursor, 1);
@@ -1342,7 +1341,7 @@ mod test {
         assert_eq!(
             expr,
             Expr::NumericLiteral(NumericLiteral {
-                value: Cow::Borrowed("12345")
+                value: "12345"
             })
         );
         assert_eq!(cursor, 1);
@@ -1371,7 +1370,7 @@ mod test {
         assert_eq!(
             expr,
             Expr::Star(Star {
-                prefix: Some(Cow::Borrowed("t"))
+                prefix: Some("t")
             })
         );
         assert_eq!(cursor, 3);
@@ -1387,7 +1386,7 @@ mod test {
             expr,
             Expr::Field(Field {
                 prefix: None,
-                name: Cow::Borrowed("col1")
+                name: "col1"
             })
         );
         assert_eq!(cursor, 1);
@@ -1409,8 +1408,8 @@ mod test {
         assert_eq!(
             expr,
             Expr::Field(Field {
-                prefix: Some(Cow::Borrowed("usr")),
-                name: Cow::Borrowed("id")
+                prefix: Some("usr"),
+                name: "id"
             })
         );
         assert_eq!(cursor, 3);
@@ -1447,9 +1446,9 @@ mod test {
             expr,
             Expr::FunctionCall(FunctionCall {
                 distinct: true,
-                name: Cow::Borrowed("c"),
+                name: "c",
                 args: mini_vec![Expr::NumericLiteral(NumericLiteral {
-                    value: Cow::Borrowed("3")
+                    value: "3"
                 })]
             })
         );
