@@ -37,7 +37,7 @@ pub enum BinaryOperator {
 }
 
 impl BinaryOperator {
-    pub fn from_token_kind(kind: &TokenKind) -> Option<Self> {
+    pub(crate) fn from_token_kind(kind: &TokenKind) -> Option<Self> {
         match kind {
             TokenKind::Plus => Some(BinaryOperator::Add),
             TokenKind::Subtract => Some(BinaryOperator::Subtract),

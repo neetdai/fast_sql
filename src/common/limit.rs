@@ -12,7 +12,7 @@ pub struct Limit<'a> {
 }
 
 impl<'a> Limit<'a> {
-    pub fn new(token_table: &TokenTable<'a>, cursor: &mut usize) -> Result<Self, ParserError> {
+    pub(crate) fn new(token_table: &TokenTable<'a>, cursor: &mut usize) -> Result<Self, ParserError> {
         expect_kind(token_table, cursor, &TokenKind::Keyword(Keyword::Limit))?;
         *cursor += 1;
 

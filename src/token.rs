@@ -4,7 +4,7 @@ use crate::keyword::Keyword;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[repr(u16)]
-pub(crate) enum TokenKind {
+pub enum TokenKind {
     Number,
     StringLiteral,
     Identifier,
@@ -63,9 +63,9 @@ impl Display for TokenKind {
 }
 
 #[derive(Debug)]
-pub(crate) struct TokenTable<'a> {
-    pub(crate) tokens: Vec<TokenKind>,
-    pub(crate) source_ref_list: Vec<Cow<'a, str>>,
+pub struct TokenTable<'a> {
+    pub tokens: Vec<TokenKind>,
+    pub source_ref_list: Vec<Cow<'a, str>>,
 }
 
 impl<'a> TokenTable<'a> {

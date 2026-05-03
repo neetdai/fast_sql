@@ -15,7 +15,7 @@ pub enum Statement<'a> {
 }
 
 impl<'a> Statement<'a> {
-    pub fn new(token_table: &TokenTable<'a>, cursor: &mut usize) -> Result<Self, ParserError> {
+    pub(crate) fn new(token_table: &TokenTable<'a>, cursor: &mut usize) -> Result<Self, ParserError> {
         Self::match_statement(token_table, cursor)
     }
 

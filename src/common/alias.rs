@@ -6,7 +6,7 @@ use crate::{
     token::{TokenKind, TokenTable},
 };
 
-pub(crate) trait Aliasable<'a>: Sized {
+pub trait Aliasable<'a>: Sized {
     fn aliasable(token_table: &TokenTable<'a>, cursor: &mut usize) -> Result<Self, ParserError>;
 }
 
