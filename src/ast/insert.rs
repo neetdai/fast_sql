@@ -26,10 +26,7 @@ impl<'a> InsertStatement<'a> {
         Self::build_ast(token_table, cursor)
     }
 
-    fn build_ast(
-        token_table: &TokenTable<'a>,
-        cursor: &mut usize,
-    ) -> Result<Self, ParserError> {
+    fn build_ast(token_table: &TokenTable<'a>, cursor: &mut usize) -> Result<Self, ParserError> {
         expect_kind(token_table, cursor, &TokenKind::Keyword(Keyword::Insert))?;
         *cursor += 1;
 

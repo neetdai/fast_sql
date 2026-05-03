@@ -7,10 +7,7 @@ use crate::{
 };
 
 pub(crate) trait Aliasable<'a>: Sized {
-    fn aliasable(
-        token_table: &TokenTable<'a>,
-        cursor: &mut usize,
-    ) -> Result<Self, ParserError>;
+    fn aliasable(token_table: &TokenTable<'a>, cursor: &mut usize) -> Result<Self, ParserError>;
 }
 
 #[derive(Debug, PartialEq)]

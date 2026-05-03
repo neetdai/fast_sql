@@ -28,17 +28,11 @@ pub struct SelectStatement<'a> {
 }
 
 impl<'a> SelectStatement<'a> {
-    pub fn new(
-        token_table: &TokenTable<'a>,
-        cursor: &mut usize,
-    ) -> Result<Self, ParserError> {
+    pub fn new(token_table: &TokenTable<'a>, cursor: &mut usize) -> Result<Self, ParserError> {
         Self::build_ast(token_table, cursor)
     }
 
-    fn build_ast(
-        token_table: &TokenTable<'a>,
-        cursor: &mut usize,
-    ) -> Result<Self, ParserError> {
+    fn build_ast(token_table: &TokenTable<'a>, cursor: &mut usize) -> Result<Self, ParserError> {
         expect_kind(token_table, cursor, &TokenKind::Keyword(Keyword::Select))?;
         *cursor += 1;
 
@@ -142,10 +136,7 @@ impl<'a> SelectStatement<'a> {
 pub type SubSelectStatement<'a> = Box<SelectStatement<'a>>;
 
 impl<'a> Aliasable<'a> for SubSelectStatement<'a> {
-    fn aliasable(
-        token_table: &TokenTable<'a>,
-        cursor: &mut usize,
-    ) -> Result<Self, ParserError> {
+    fn aliasable(token_table: &TokenTable<'a>, cursor: &mut usize) -> Result<Self, ParserError> {
         expect_kind(token_table, cursor, &TokenKind::LeftParen)?;
         *cursor += 1;
         let select_stmt = SelectStatement::new(token_table, cursor)?;

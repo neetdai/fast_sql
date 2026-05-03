@@ -312,51 +312,84 @@ impl<'a> Lexer<'a> {
         let end = self.position;
         match self.inner.get(self.position) {
             Some(b'(') => {
-                table.push(TokenKind::LeftParen, String::from_utf8_lossy(&self.inner[start..=end]));
+                table.push(
+                    TokenKind::LeftParen,
+                    String::from_utf8_lossy(&self.inner[start..=end]),
+                );
                 self.position += 1;
             }
             Some(b')') => {
-                table.push(TokenKind::RightParen, String::from_utf8_lossy(&self.inner[start..=end]));
+                table.push(
+                    TokenKind::RightParen,
+                    String::from_utf8_lossy(&self.inner[start..=end]),
+                );
                 self.position += 1;
             }
             Some(b'<') => match self.inner.get(self.position + 1) {
                 Some(b'=') => {
-                    table.push(TokenKind::LessEqual, String::from_utf8_lossy(&self.inner[self.position..= self.position + 1]));
+                    table.push(
+                        TokenKind::LessEqual,
+                        String::from_utf8_lossy(&self.inner[self.position..=self.position + 1]),
+                    );
                     self.position += 2;
                 }
                 Some(b'>') => {
-                    table.push(TokenKind::NotEqual, String::from_utf8_lossy(&self.inner[self.position..= self.position + 1]));
+                    table.push(
+                        TokenKind::NotEqual,
+                        String::from_utf8_lossy(&self.inner[self.position..=self.position + 1]),
+                    );
                     self.position += 2;
                 }
                 _ => {
-                    table.push(TokenKind::Less, String::from_utf8_lossy(&self.inner[start..= end]));
+                    table.push(
+                        TokenKind::Less,
+                        String::from_utf8_lossy(&self.inner[start..=end]),
+                    );
                     self.position += 1;
                 }
             },
             Some(b'>') => match self.inner.get(self.position + 1) {
                 Some(b'=') => {
-                    table.push(TokenKind::GreaterEqual, String::from_utf8_lossy(&self.inner[self.position..= self.position + 1]));
+                    table.push(
+                        TokenKind::GreaterEqual,
+                        String::from_utf8_lossy(&self.inner[self.position..=self.position + 1]),
+                    );
                     self.position += 2;
                 }
                 _ => {
-                    table.push(TokenKind::Greater,String::from_utf8_lossy(&self.inner[start..= end]));
+                    table.push(
+                        TokenKind::Greater,
+                        String::from_utf8_lossy(&self.inner[start..=end]),
+                    );
                     self.position += 1;
                 }
             },
             Some(b'=') => {
-                table.push(TokenKind::Equal, String::from_utf8_lossy(&self.inner[start..= end]));
+                table.push(
+                    TokenKind::Equal,
+                    String::from_utf8_lossy(&self.inner[start..=end]),
+                );
                 self.position += 1;
             }
             Some(b'.') => {
-                table.push(TokenKind::Dot, String::from_utf8_lossy(&self.inner[start..= end]));
+                table.push(
+                    TokenKind::Dot,
+                    String::from_utf8_lossy(&self.inner[start..=end]),
+                );
                 self.position += 1;
             }
             Some(b',') => {
-                table.push(TokenKind::Comma, String::from_utf8_lossy(&self.inner[start..= end]));
+                table.push(
+                    TokenKind::Comma,
+                    String::from_utf8_lossy(&self.inner[start..=end]),
+                );
                 self.position += 1;
             }
             Some(b'+') => {
-                table.push(TokenKind::Plus, String::from_utf8_lossy(&self.inner[start..= end]));
+                table.push(
+                    TokenKind::Plus,
+                    String::from_utf8_lossy(&self.inner[start..=end]),
+                );
                 self.position += 1;
             }
             Some(b'-') => match self.inner.get(self.position + 1) {
@@ -367,16 +400,22 @@ impl<'a> Lexer<'a> {
                     let start = self.position;
                     self.position += 1;
                     let (kind, _, end) = self.scan_number()?;
-                    table.push(kind, String::from_utf8_lossy(&self.inner[start..= end]));
+                    table.push(kind, String::from_utf8_lossy(&self.inner[start..=end]));
                     self.position += 1;
                 }
                 _ => {
-                    table.push(TokenKind::Subtract,String::from_utf8_lossy(&self.inner[start..= end]));
+                    table.push(
+                        TokenKind::Subtract,
+                        String::from_utf8_lossy(&self.inner[start..=end]),
+                    );
                     self.position += 1;
                 }
             },
             Some(b'*') => {
-                table.push(TokenKind::Multiply, String::from_utf8_lossy(&self.inner[ start..= end]));
+                table.push(
+                    TokenKind::Multiply,
+                    String::from_utf8_lossy(&self.inner[start..=end]),
+                );
                 self.position += 1;
             }
             Some(b'/') => match self.inner.get(self.position + 1) {
@@ -387,33 +426,54 @@ impl<'a> Lexer<'a> {
                     self.skip_line_comment();
                 }
                 _ => {
-                    table.push(TokenKind::Divide, String::from_utf8_lossy(&self.inner[start..= end]));
+                    table.push(
+                        TokenKind::Divide,
+                        String::from_utf8_lossy(&self.inner[start..=end]),
+                    );
                     self.position += 1;
                 }
             },
             Some(b'%') => {
-                table.push(TokenKind::Mod, String::from_utf8_lossy(&self.inner[start..= end]));
+                table.push(
+                    TokenKind::Mod,
+                    String::from_utf8_lossy(&self.inner[start..=end]),
+                );
                 self.position += 1;
             }
             Some(b';') => {
-                table.push(TokenKind::Eof, String::from_utf8_lossy(&self.inner[start..= end]));
+                table.push(
+                    TokenKind::Eof,
+                    String::from_utf8_lossy(&self.inner[start..=end]),
+                );
                 self.position += 1;
             }
             Some(b'&') => {
-                table.push(TokenKind::And, String::from_utf8_lossy(&self.inner[start..= end]));
+                table.push(
+                    TokenKind::And,
+                    String::from_utf8_lossy(&self.inner[start..=end]),
+                );
                 self.position += 1;
             }
             Some(b'|') => {
-                table.push(TokenKind::Or,String::from_utf8_lossy(&self.inner[start..= end]));
+                table.push(
+                    TokenKind::Or,
+                    String::from_utf8_lossy(&self.inner[start..=end]),
+                );
                 self.position += 1;
             }
             Some(b'^') => {
-                table.push(TokenKind::Xor, String::from_utf8_lossy(&self.inner[start..= end]));
+                table.push(
+                    TokenKind::Xor,
+                    String::from_utf8_lossy(&self.inner[start..=end]),
+                );
                 self.position += 1;
             }
             Some(b'!') => match self.inner.get(self.position + 1) {
                 Some(b'=') => {
-                    table.push(TokenKind::NotEqual, String::from_utf8_lossy(&self.inner[self.position ..= self.position + 1]));
+                    table.push(
+                        TokenKind::NotEqual,
+                        String::from_utf8_lossy(&self.inner[self.position..=self.position + 1]),
+                    );
                     self.position += 2;
                 }
                 _ => {
@@ -425,10 +485,7 @@ impl<'a> Lexer<'a> {
         Ok(())
     }
 
-    pub(crate) fn tokenize(
-        &mut self,
-        table: &mut TokenTable<'a>,
-    ) -> Result<(), ParserError> {
+    pub(crate) fn tokenize(&mut self, table: &mut TokenTable<'a>) -> Result<(), ParserError> {
         loop {
             self.skip_whitespace();
 
@@ -442,21 +499,24 @@ impl<'a> Lexer<'a> {
             if (char_class & C_ALP) != 0 {
                 if (char_class & C_DIG) != 0 {
                     let (kind, start, end) = self.scan_number()?;
-                    table.push(kind, String::from_utf8_lossy(&self.inner[start..= end]));
+                    table.push(kind, String::from_utf8_lossy(&self.inner[start..=end]));
                     self.position += 1;
                 } else {
                     let (kind, start, end) = self.scan_identify()?;
-                    table.push(kind, String::from_utf8_lossy(&self.inner[start..= end]));
+                    table.push(kind, String::from_utf8_lossy(&self.inner[start..=end]));
                     self.position += 1;
                 }
             } else if (char_class & C_SYM) != 0 {
                 self.scan_symbol(&mut *table)?;
             } else if (char_class & C_QUO) != 0 {
                 let (kind, start, end) = self.scan_string(c)?;
-                table.push(kind, String::from_utf8_lossy(&self.inner[start..= end]));
+                table.push(kind, String::from_utf8_lossy(&self.inner[start..=end]));
                 self.position += 1;
             } else {
-                table.push(TokenKind::Unknown, String::from_utf8_lossy(&self.inner[self.position..= self.position]));
+                table.push(
+                    TokenKind::Unknown,
+                    String::from_utf8_lossy(&self.inner[self.position..=self.position]),
+                );
                 self.position += 1;
             }
 
@@ -570,7 +630,10 @@ mod tests {
     use super::*;
     use crate::token::TokenKind;
 
-    fn tokenize<'a>(keyword_map: &'a KeywordMap, sql: &'a str) -> Result<(Vec<TokenKind>, Vec<Cow<'a, str>>), ParserError> {
+    fn tokenize<'a>(
+        keyword_map: &'a KeywordMap,
+        sql: &'a str,
+    ) -> Result<(Vec<TokenKind>, Vec<Cow<'a, str>>), ParserError> {
         let mut table = TokenTable::with_source(sql);
         let mut lexer = Lexer::new(sql, &keyword_map).unwrap();
         lexer.tokenize(&mut table)?;
@@ -613,7 +676,10 @@ mod tests {
             .unwrap(),
             (
                 vec![TokenKind::Number, TokenKind::Number],
-                vec![Cow::Borrowed("123451111111111111111111111111111111111111"), Cow::Borrowed("2222222222222222222222222222")]
+                vec![
+                    Cow::Borrowed("123451111111111111111111111111111111111111"),
+                    Cow::Borrowed("2222222222222222222222222222")
+                ]
             )
         );
         assert_eq!(
@@ -625,7 +691,7 @@ mod tests {
             (vec![TokenKind::Number], vec![Cow::Borrowed("-123.456")])
         );
         assert_eq!(
-            tokenize(&keyword_map,"123_456_7890").unwrap(),
+            tokenize(&keyword_map, "123_456_7890").unwrap(),
             (vec![TokenKind::Number], vec![Cow::Borrowed("123_456_7890")])
         );
         assert_eq!(
@@ -634,14 +700,17 @@ mod tests {
         );
         assert_eq!(
             tokenize(&keyword_map, "-123.456_789E10").unwrap(),
-            (vec![TokenKind::Number], vec![Cow::Borrowed("-123.456_789E10")])
+            (
+                vec![TokenKind::Number],
+                vec![Cow::Borrowed("-123.456_789E10")]
+            )
         );
         assert_eq!(
             tokenize(&keyword_map, "1").unwrap(),
             (vec![TokenKind::Number], vec![Cow::Borrowed("1")])
         );
         assert_eq!(
-            tokenize(&keyword_map,"0xFF").unwrap(),
+            tokenize(&keyword_map, "0xFF").unwrap(),
             (vec![TokenKind::Number], vec![Cow::Borrowed("0xFF")])
         );
         assert_eq!(
@@ -665,7 +734,7 @@ mod tests {
             (vec![TokenKind::Number], vec![Cow::Borrowed("0b1010")])
         );
         assert_eq!(
-            tokenize(&keyword_map,"0b1111_0000").unwrap(),
+            tokenize(&keyword_map, "0b1111_0000").unwrap(),
             (vec![TokenKind::Number], vec![Cow::Borrowed("0b1111_0000")])
         );
         assert!(tokenize_err("0x"));
@@ -682,7 +751,7 @@ mod tests {
     #[test]
     fn test_tokenize_cmp() {
         let keyword_map = KeywordMap::new().unwrap();
-        let (tokens, positions) = tokenize(&keyword_map,"a > b >= c < d <= e <> f = g").unwrap();
+        let (tokens, positions) = tokenize(&keyword_map, "a > b >= c < d <= e <> f = g").unwrap();
         assert_eq!(
             tokens,
             vec![
@@ -730,25 +799,43 @@ mod tests {
         );
         assert_eq!(
             tokenize(&keyword_map, "'helloWorld'").unwrap(),
-            (vec![TokenKind::StringLiteral], vec![Cow::Borrowed("'helloWorld'")])
+            (
+                vec![TokenKind::StringLiteral],
+                vec![Cow::Borrowed("'helloWorld'")]
+            )
         );
         assert_eq!(
             tokenize(&keyword_map, r#"'hello\\'"#).unwrap(),
-            (vec![TokenKind::StringLiteral], vec![Cow::Borrowed(r#"'hello\\'"#)])
+            (
+                vec![TokenKind::StringLiteral],
+                vec![Cow::Borrowed(r#"'hello\\'"#)]
+            )
         );
         assert_eq!(
-            tokenize(&keyword_map,
+            tokenize(
+                &keyword_map,
                 "'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'"
             )
             .unwrap(),
-            (vec![TokenKind::StringLiteral], vec![Cow::Borrowed("'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'")])
+            (
+                vec![TokenKind::StringLiteral],
+                vec![Cow::Borrowed(
+                    "'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'"
+                )]
+            )
         );
         assert_eq!(
-            tokenize(&keyword_map,
+            tokenize(
+                &keyword_map,
                 "\'aaaaaaaaaaaaa\\'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\'"
             )
             .unwrap(),
-            (vec![TokenKind::StringLiteral], vec![Cow::Borrowed("\'aaaaaaaaaaaaa\\'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\'")])
+            (
+                vec![TokenKind::StringLiteral],
+                vec![Cow::Borrowed(
+                    "\'aaaaaaaaaaaaa\\'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\'"
+                )]
+            )
         );
     }
 
@@ -760,10 +847,17 @@ mod tests {
             (vec![TokenKind::Identifier], vec![Cow::Borrowed("asdfghjk")])
         );
         assert_eq!(
-            tokenize(&keyword_map, "qwertyuiopASDFGHJKL1234567890_zxcvbnm 1234567890").unwrap(),
+            tokenize(
+                &keyword_map,
+                "qwertyuiopASDFGHJKL1234567890_zxcvbnm 1234567890"
+            )
+            .unwrap(),
             (
                 vec![TokenKind::Identifier, TokenKind::Number],
-                vec![Cow::Borrowed("qwertyuiopASDFGHJKL1234567890_zxcvbnm"), Cow::Borrowed("1234567890")]
+                vec![
+                    Cow::Borrowed("qwertyuiopASDFGHJKL1234567890_zxcvbnm"),
+                    Cow::Borrowed("1234567890")
+                ]
             )
         );
     }
@@ -779,13 +873,16 @@ mod tests {
                 TokenKind::Keyword(Keyword::From)
             ]
         );
-        assert_eq!(positions, vec![Cow::Borrowed("select"), Cow::Borrowed("from")]);
+        assert_eq!(
+            positions,
+            vec![Cow::Borrowed("select"), Cow::Borrowed("from")]
+        );
     }
 
     #[test]
     fn test_sql() {
         let keyword_map = KeywordMap::new().unwrap();
-        let (tokens, positions) = tokenize(&keyword_map,"select * from a").unwrap();
+        let (tokens, positions) = tokenize(&keyword_map, "select * from a").unwrap();
         assert_eq!(
             tokens,
             vec![
@@ -795,7 +892,15 @@ mod tests {
                 TokenKind::Identifier,
             ]
         );
-        assert_eq!(positions, vec![Cow::Borrowed("select"), Cow::Borrowed("*"), Cow::Borrowed("from"), Cow::Borrowed("a")]);
+        assert_eq!(
+            positions,
+            vec![
+                Cow::Borrowed("select"),
+                Cow::Borrowed("*"),
+                Cow::Borrowed("from"),
+                Cow::Borrowed("a")
+            ]
+        );
     }
 
     #[test]

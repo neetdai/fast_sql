@@ -166,10 +166,7 @@ impl<'a> Expr<'a> {
 }
 
 impl<'a> Aliasable<'a> for Expr<'a> {
-    fn aliasable(
-        token_table: &TokenTable<'a>,
-        cursor: &mut usize,
-    ) -> Result<Self, ParserError> {
+    fn aliasable(token_table: &TokenTable<'a>, cursor: &mut usize) -> Result<Self, ParserError> {
         Self::build(token_table, cursor)
     }
 }
@@ -907,7 +904,10 @@ mod test {
     fn make_table<'a>(source: &'a str, entries: Vec<(TokenKind, usize, usize)>) -> TokenTable<'a> {
         let mut table = TokenTable::with_source(source);
         for (kind, start, end) in entries {
-            table.push(kind, String::from_utf8_lossy(&source.as_bytes()[start..= end]));
+            table.push(
+                kind,
+                String::from_utf8_lossy(&source.as_bytes()[start..=end]),
+            );
         }
         table
     }
@@ -1032,8 +1032,12 @@ mod test {
             Expr::FunctionCall(FunctionCall {
                 name: Cow::Borrowed("bar"),
                 args: mini_vec![
-                    Expr::StringLiteral(StringLiteral { value: Cow::Borrowed("'x'") }),
-                    Expr::StringLiteral(StringLiteral { value: Cow::Borrowed("'y'") }),
+                    Expr::StringLiteral(StringLiteral {
+                        value: Cow::Borrowed("'x'")
+                    }),
+                    Expr::StringLiteral(StringLiteral {
+                        value: Cow::Borrowed("'y'")
+                    }),
                 ],
                 distinct: false,
             })
@@ -1078,11 +1082,17 @@ mod test {
             expr,
             Expr::BinaryOp(Box::new(BinaryOp {
                 op: BinaryOperator::Add,
-                left: Expr::NumericLiteral(NumericLiteral { value: Cow::Borrowed("1") }),
+                left: Expr::NumericLiteral(NumericLiteral {
+                    value: Cow::Borrowed("1")
+                }),
                 right: Expr::BinaryOp(Box::new(BinaryOp {
                     op: BinaryOperator::Multiply,
-                    left: Expr::NumericLiteral(NumericLiteral { value: Cow::Borrowed("2") }),
-                    right: Expr::NumericLiteral(NumericLiteral { value: Cow::Borrowed("3") }),
+                    left: Expr::NumericLiteral(NumericLiteral {
+                        value: Cow::Borrowed("2")
+                    }),
+                    right: Expr::NumericLiteral(NumericLiteral {
+                        value: Cow::Borrowed("3")
+                    }),
                 })),
             }))
         );
@@ -1110,10 +1120,16 @@ mod test {
                 op: BinaryOperator::Add,
                 left: Expr::BinaryOp(Box::new(BinaryOp {
                     op: BinaryOperator::Multiply,
-                    left: Expr::NumericLiteral(NumericLiteral { value: Cow::Borrowed("1") }),
-                    right: Expr::NumericLiteral(NumericLiteral { value: Cow::Borrowed("2") }),
+                    left: Expr::NumericLiteral(NumericLiteral {
+                        value: Cow::Borrowed("1")
+                    }),
+                    right: Expr::NumericLiteral(NumericLiteral {
+                        value: Cow::Borrowed("2")
+                    }),
                 })),
-                right: Expr::NumericLiteral(NumericLiteral { value: Cow::Borrowed("3") }),
+                right: Expr::NumericLiteral(NumericLiteral {
+                    value: Cow::Borrowed("3")
+                }),
             }))
         );
         assert_eq!(cursor, 5);
@@ -1142,10 +1158,16 @@ mod test {
                 op: BinaryOperator::Multiply,
                 left: Expr::BinaryOp(Box::new(BinaryOp {
                     op: BinaryOperator::Add,
-                    left: Expr::NumericLiteral(NumericLiteral { value: Cow::Borrowed("1") }),
-                    right: Expr::NumericLiteral(NumericLiteral { value: Cow::Borrowed("2") }),
+                    left: Expr::NumericLiteral(NumericLiteral {
+                        value: Cow::Borrowed("1")
+                    }),
+                    right: Expr::NumericLiteral(NumericLiteral {
+                        value: Cow::Borrowed("2")
+                    }),
                 })),
-                right: Expr::NumericLiteral(NumericLiteral { value: Cow::Borrowed("3") }),
+                right: Expr::NumericLiteral(NumericLiteral {
+                    value: Cow::Borrowed("3")
+                }),
             }))
         );
         assert_eq!(cursor, 7);
@@ -1168,8 +1190,12 @@ mod test {
             expr,
             Expr::BinaryOp(Box::new(BinaryOp {
                 op: BinaryOperator::Divide,
-                left: Expr::NumericLiteral(NumericLiteral { value: Cow::Borrowed("1") }),
-                right: Expr::NumericLiteral(NumericLiteral { value: Cow::Borrowed("2") }),
+                left: Expr::NumericLiteral(NumericLiteral {
+                    value: Cow::Borrowed("1")
+                }),
+                right: Expr::NumericLiteral(NumericLiteral {
+                    value: Cow::Borrowed("2")
+                }),
             }))
         );
         assert_eq!(cursor, 3);
@@ -1189,8 +1215,12 @@ mod test {
             expr,
             Expr::BinaryOp(Box::new(BinaryOp {
                 op: BinaryOperator::Mod,
-                left: Expr::NumericLiteral(NumericLiteral { value: Cow::Borrowed("1") }),
-                right: Expr::NumericLiteral(NumericLiteral { value: Cow::Borrowed("2") }),
+                left: Expr::NumericLiteral(NumericLiteral {
+                    value: Cow::Borrowed("1")
+                }),
+                right: Expr::NumericLiteral(NumericLiteral {
+                    value: Cow::Borrowed("2")
+                }),
             }))
         );
     }
@@ -1216,7 +1246,9 @@ mod test {
                     prefix: None,
                     name: Cow::Borrowed("id")
                 }),
-                right: Expr::NumericLiteral(NumericLiteral { value: Cow::Borrowed("1") }),
+                right: Expr::NumericLiteral(NumericLiteral {
+                    value: Cow::Borrowed("1")
+                }),
             }))
         );
         assert_eq!(cursor, 3);
@@ -1240,7 +1272,9 @@ mod test {
                     prefix: None,
                     name: Cow::Borrowed("id")
                 }),
-                right: Expr::StringLiteral(StringLiteral { value: Cow::Borrowed("'x'") }),
+                right: Expr::StringLiteral(StringLiteral {
+                    value: Cow::Borrowed("'x'")
+                }),
             }))
         );
     }
@@ -1307,7 +1341,9 @@ mod test {
         let expr = Expr::class_number_literal(&token_table, &mut cursor).unwrap();
         assert_eq!(
             expr,
-            Expr::NumericLiteral(NumericLiteral { value: Cow::Borrowed("12345") })
+            Expr::NumericLiteral(NumericLiteral {
+                value: Cow::Borrowed("12345")
+            })
         );
         assert_eq!(cursor, 1);
     }
@@ -1332,7 +1368,12 @@ mod test {
         );
         let mut cursor = 0;
         let expr = Expr::class_star(&token_table2, &mut cursor).unwrap();
-        assert_eq!(expr, Expr::Star(Star { prefix: Some(Cow::Borrowed("t")) }));
+        assert_eq!(
+            expr,
+            Expr::Star(Star {
+                prefix: Some(Cow::Borrowed("t"))
+            })
+        );
         assert_eq!(cursor, 3);
     }
 
@@ -1380,10 +1421,7 @@ mod test {
         let source = "5 x";
         let token_table = make_table(
             source,
-            vec![
-                (TokenKind::Number, 0, 0),
-                (TokenKind::Identifier, 2, 2),
-            ],
+            vec![(TokenKind::Number, 0, 0), (TokenKind::Identifier, 2, 2)],
         );
         let mut cursor = 0;
         let result = Expr::class_field(&token_table, &mut cursor);
@@ -1410,7 +1448,9 @@ mod test {
             Expr::FunctionCall(FunctionCall {
                 distinct: true,
                 name: Cow::Borrowed("c"),
-                args: mini_vec![Expr::NumericLiteral(NumericLiteral { value: Cow::Borrowed("3") })]
+                args: mini_vec![Expr::NumericLiteral(NumericLiteral {
+                    value: Cow::Borrowed("3")
+                })]
             })
         );
     }

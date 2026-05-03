@@ -196,13 +196,13 @@ mod tests {
     use crate::common::expr::{BinaryOp, BinaryOperator, Field};
     use crate::token::TokenKind;
 
-    fn make_table<'a>(
-        source: &'a str,
-        tokens: Vec<(TokenKind, usize, usize)>,
-    ) -> TokenTable<'a> {
+    fn make_table<'a>(source: &'a str, tokens: Vec<(TokenKind, usize, usize)>) -> TokenTable<'a> {
         let mut table = TokenTable::with_source(source);
         for (kind, start, end) in tokens {
-            table.push(kind, String::from_utf8_lossy(&source.as_bytes()[start..=end]));
+            table.push(
+                kind,
+                String::from_utf8_lossy(&source.as_bytes()[start..=end]),
+            );
         }
         table
     }
@@ -229,10 +229,7 @@ mod tests {
     fn test_table_with_alias() {
         let tokens = make_table(
             "users u",
-            vec![
-                (TokenKind::Identifier, 0, 4),
-                (TokenKind::Identifier, 6, 6),
-            ],
+            vec![(TokenKind::Identifier, 0, 4), (TokenKind::Identifier, 6, 6)],
         );
         let mut cursor = 0;
         let result = From::parse(&tokens, &mut cursor).unwrap();

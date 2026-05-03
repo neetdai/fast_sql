@@ -24,10 +24,7 @@ pub struct Cte<'a> {
 }
 
 impl<'a> CteBinding<'a> {
-    fn new(
-        token_table: &TokenTable<'a>,
-        cursor: &mut usize,
-    ) -> Result<Self, ParserError> {
+    fn new(token_table: &TokenTable<'a>, cursor: &mut usize) -> Result<Self, ParserError> {
         let name = match token_table.get_kind(*cursor) {
             Some(TokenKind::Identifier) => token_table.source_at(*cursor),
             _ => return Err(ParserError::SyntaxError(*cursor, *cursor)),

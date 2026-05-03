@@ -1,7 +1,7 @@
 use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
+use mimalloc::MiMalloc;
 use simd_sql::Parser;
 use std::hint::black_box;
-use mimalloc::MiMalloc;
 
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
@@ -21,7 +21,7 @@ fn criterion_benchmark(c: &mut Criterion) {
             b.iter(|| {
                 parser.parse(black_box(&i)).unwrap();
             });
-        }
+        },
     );
 
     let sql_2 = "WITH top_products AS ( SELECT product_id, SUM(quantity) AS total_sold FROM order_items GROUP BY product_id ORDER BY total_sold DESC LIMIT 10 ), product_details AS ( SELECT p.product_id, p.product_name, p.unit_price FROM products p WHERE p.product_id IN (SELECT product_id FROM top_products) ) SELECT tp.product_id, pd.product_name, tp.total_sold, pd.unit_price FROM top_products tp JOIN product_details pd ON tp.product_id = pd.product_id;";
@@ -34,7 +34,7 @@ fn criterion_benchmark(c: &mut Criterion) {
             b.iter(|| {
                 parser.parse(black_box(&i)).unwrap();
             });
-        }
+        },
     );
 
     let sql_3 = "SELECT order_id, ROUND(SUM(quantity * unit_price * (1 - discount)) * (1 + tax_rate), 2) AS net_total, LOG(2, ABS(SUM(quantity))) AS log_qty, POWER(SUM(quantity), 2) AS squared_qty FROM order_items GROUP BY order_id;";
@@ -47,7 +47,7 @@ fn criterion_benchmark(c: &mut Criterion) {
             b.iter(|| {
                 parser.parse(black_box(&i)).unwrap();
             });
-        }
+        },
     );
 }
 
