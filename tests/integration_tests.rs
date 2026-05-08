@@ -234,6 +234,20 @@ fn parse_insert_single_column() {
     );
 }
 
+#[test]
+fn parse_insert_select() {
+    let p = Parser::new().expect("failed to initialize Parser");
+    let sql = "INSERT INTO users (id, name) SELECT id, name FROM old_users";
+    assert!(p.parse(sql).is_ok(), "INSERT with SELECT should parse");
+}
+
+#[test]
+fn parse_insert_select_without_columns() {
+    let p = Parser::new().expect("failed to initialize Parser");
+    let sql = "INSERT INTO users SELECT id, name FROM old_users";
+    assert!(p.parse(sql).is_ok(), "INSERT with SELECT should parse");
+}
+
 // ============================================================================
 // UPDATE 语句测试
 // ============================================================================
