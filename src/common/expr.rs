@@ -30,6 +30,8 @@ pub enum BinaryOperator {
     GreaterEqual,
     BitAnd,
     BitXor,
+    LeftShift,
+    RightShift,
     And,
     Or,
     Between,
@@ -54,6 +56,8 @@ impl BinaryOperator {
             TokenKind::GreaterEqual => Some(BinaryOperator::GreaterEqual),
             TokenKind::BitAnd => Some(BinaryOperator::BitAnd),
             TokenKind::BitXor => Some(BinaryOperator::BitXor),
+            TokenKind::LeftShift => Some(BinaryOperator::LeftShift),
+            TokenKind::RightShift => Some(BinaryOperator::RightShift),
             TokenKind::Keyword(Keyword::And) => Some(BinaryOperator::And),
             TokenKind::Keyword(Keyword::Or) => Some(BinaryOperator::Or),
             TokenKind::Keyword(Keyword::Between) => Some(BinaryOperator::Between),
@@ -73,15 +77,17 @@ impl PrecedenceTrait for BinaryOperator {
             BinaryOperator::Not
             | BinaryOperator::Between
             | BinaryOperator::In
-            | BinaryOperator::Like
-            | BinaryOperator::BitAnd
-            | BinaryOperator::BitXor => 4,
+            | BinaryOperator::Like => 4,
             BinaryOperator::Less
             | BinaryOperator::LessEqual
             | BinaryOperator::Greater
             | BinaryOperator::GreaterEqual => 5,
-            BinaryOperator::Add | BinaryOperator::Subtract => 6,
-            BinaryOperator::Multiply | BinaryOperator::Divide | BinaryOperator::Mod => 7,
+            BinaryOperator::LeftShift
+            | BinaryOperator::RightShift
+            | BinaryOperator::BitAnd
+            | BinaryOperator::BitXor => 6,
+            BinaryOperator::Add | BinaryOperator::Subtract => 7,
+            BinaryOperator::Multiply | BinaryOperator::Divide | BinaryOperator::Mod => 8,
         }
     }
 

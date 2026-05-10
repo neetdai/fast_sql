@@ -340,6 +340,13 @@ impl<'a> Lexer<'a> {
                     );
                     self.position += 2;
                 }
+                Some(b'<') => {
+                    table.push(
+                        TokenKind::LeftShift,
+                        unsafe {str::from_utf8_unchecked(&self.inner[self.position..=self.position + 1])},
+                    );
+                    self.position += 2;
+                }
                 _ => {
                     table.push(
                         TokenKind::Less,
@@ -352,6 +359,13 @@ impl<'a> Lexer<'a> {
                 Some(b'=') => {
                     table.push(
                         TokenKind::GreaterEqual,
+                        unsafe {str::from_utf8_unchecked(&self.inner[self.position..=self.position + 1])},
+                    );
+                    self.position += 2;
+                }
+                Some(b'>') => {
+                    table.push(
+                        TokenKind::RightShift,
                         unsafe {str::from_utf8_unchecked(&self.inner[self.position..=self.position + 1])},
                     );
                     self.position += 2;
