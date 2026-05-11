@@ -314,14 +314,14 @@ impl<'a> Lexer<'a> {
             Some(b'(') => {
                 table.push(
                     TokenKind::LeftParen,
-                    unsafe {str::from_utf8_unchecked(&self.inner[start..=end])},
+                    self.save_str(start, end),
                 );
                 self.position += 1;
             }
             Some(b')') => {
                 table.push(
                     TokenKind::RightParen,
-                    unsafe {str::from_utf8_unchecked(&self.inner[start..=end])},
+                    self.save_str(start, end),
                 );
                 self.position += 1;
             }
@@ -329,28 +329,28 @@ impl<'a> Lexer<'a> {
                 Some(b'=') => {
                     table.push(
                         TokenKind::LessEqual,
-                        unsafe {str::from_utf8_unchecked(&self.inner[self.position..=self.position + 1])},
+                        self.save_str(self.position, self.position + 1),
                     );
                     self.position += 2;
                 }
                 Some(b'>') => {
                     table.push(
                         TokenKind::NotEqual,
-                        unsafe {str::from_utf8_unchecked(&self.inner[self.position..=self.position + 1])},
+                        self.save_str(self.position, self.position + 1),
                     );
                     self.position += 2;
                 }
                 Some(b'<') => {
                     table.push(
                         TokenKind::LeftShift,
-                        unsafe {str::from_utf8_unchecked(&self.inner[self.position..=self.position + 1])},
+                        self.save_str(self.position, self.position + 1),
                     );
                     self.position += 2;
                 }
                 _ => {
                     table.push(
                         TokenKind::Less,
-                        unsafe {str::from_utf8_unchecked(&self.inner[start..=end])},
+                        self.save_str(start, end),
                     );
                     self.position += 1;
                 }
@@ -359,21 +359,21 @@ impl<'a> Lexer<'a> {
                 Some(b'=') => {
                     table.push(
                         TokenKind::GreaterEqual,
-                        unsafe {str::from_utf8_unchecked(&self.inner[self.position..=self.position + 1])},
+                        self.save_str(self.position, self.position + 1),
                     );
                     self.position += 2;
                 }
                 Some(b'>') => {
                     table.push(
                         TokenKind::RightShift,
-                        unsafe {str::from_utf8_unchecked(&self.inner[self.position..=self.position + 1])},
+                        self.save_str(self.position, self.position + 1),
                     );
                     self.position += 2;
                 }
                 _ => {
                     table.push(
                         TokenKind::Greater,
-                        unsafe {str::from_utf8_unchecked(&self.inner[start..=end])},
+                        self.save_str(start, end),
                     );
                     self.position += 1;
                 }
@@ -381,28 +381,28 @@ impl<'a> Lexer<'a> {
             Some(b'=') => {
                 table.push(
                     TokenKind::Equal,
-                    unsafe {str::from_utf8_unchecked(&self.inner[start..=end])},
+                    self.save_str(start, end),
                 );
                 self.position += 1;
             }
             Some(b'.') => {
                 table.push(
                     TokenKind::Dot,
-                    unsafe {str::from_utf8_unchecked(&self.inner[start..=end])},
+                    self.save_str(start, end),
                 );
                 self.position += 1;
             }
             Some(b',') => {
                 table.push(
                     TokenKind::Comma,
-                    unsafe {str::from_utf8_unchecked(&self.inner[start..=end])},
+                    self.save_str(start, end),
                 );
                 self.position += 1;
             }
             Some(b'+') => {
                 table.push(
                     TokenKind::Plus,
-                    unsafe {str::from_utf8_unchecked(&self.inner[start..=end])},
+                    self.save_str(start, end),
                 );
                 self.position += 1;
             }
@@ -414,13 +414,13 @@ impl<'a> Lexer<'a> {
                     let start = self.position;
                     self.position += 1;
                     let (kind, _, end) = self.scan_number()?;
-                    table.push(kind, unsafe {str::from_utf8_unchecked(&self.inner[start..=end])});
+                    table.push(kind, self.save_str(start, end));
                     self.position += 1;
                 }
                 _ => {
                     table.push(
                         TokenKind::Subtract,
-                        unsafe {str::from_utf8_unchecked(&self.inner[start..=end])},
+                        self.save_str(start, end),
                     );
                     self.position += 1;
                 }
@@ -428,7 +428,7 @@ impl<'a> Lexer<'a> {
             Some(b'*') => {
                 table.push(
                     TokenKind::Multiply,
-                    unsafe {str::from_utf8_unchecked(&self.inner[start..=end])},
+                    self.save_str(start, end),
                 );
                 self.position += 1;
             }
@@ -442,7 +442,7 @@ impl<'a> Lexer<'a> {
                 _ => {
                     table.push(
                         TokenKind::Divide,
-                        unsafe {str::from_utf8_unchecked(&self.inner[start..=end])},
+                        self.save_str(start, end),
                     );
                     self.position += 1;
                 }
@@ -450,35 +450,35 @@ impl<'a> Lexer<'a> {
             Some(b'%') => {
                 table.push(
                     TokenKind::Mod,
-                    unsafe {str::from_utf8_unchecked(&self.inner[start..=end])},
+                    self.save_str(start, end),
                 );
                 self.position += 1;
             }
             Some(b';') => {
                 table.push(
                     TokenKind::Delimiter,
-                    unsafe {str::from_utf8_unchecked(&self.inner[start..=end])},
+                    self.save_str(start,end),
                 );
                 self.position += 1;
             }
             Some(b'&') => {
                 table.push(
                     TokenKind::BitAnd,
-                    unsafe {str::from_utf8_unchecked(&self.inner[start..=end])},
+                    self.save_str(start,end),
                 );
                 self.position += 1;
             }
             Some(b'|') => {
                 table.push(
                     TokenKind::Or,
-                    unsafe {str::from_utf8_unchecked(&self.inner[start..=end])},
+                    self.save_str(start, end),
                 );
                 self.position += 1;
             }
             Some(b'^') => {
                 table.push(
                     TokenKind::BitXor,
-                    unsafe {str::from_utf8_unchecked(&self.inner[start..=end]) },
+                    self.save_str(start, end),
                 );
                 self.position += 1;
             }
@@ -486,7 +486,7 @@ impl<'a> Lexer<'a> {
                 Some(b'=') => {
                     table.push(
                         TokenKind::NotEqual,
-                        unsafe {str::from_utf8_unchecked(&self.inner[self.position..=self.position + 1])},
+                        self.save_str(self.position, self.position + 1),
                     );
                     self.position += 2;
                 }
@@ -497,6 +497,10 @@ impl<'a> Lexer<'a> {
             _ => return Err(ParserError::InvalidToken(start, end)),
         };
         Ok(())
+    }
+
+    fn save_str(&self, start: usize, end: usize) -> &'a str {
+        unsafe { str::from_utf8_unchecked(&self.inner[start..=end]) }
     }
 
     pub(crate) fn tokenize(&mut self, table: &mut TokenTable<'a>) -> Result<(), ParserError> {
@@ -513,23 +517,23 @@ impl<'a> Lexer<'a> {
             if (char_class & C_ALP) != 0 {
                 if (char_class & C_DIG) != 0 {
                     let (kind, start, end) = self.scan_number()?;
-                    table.push(kind, unsafe {str::from_utf8_unchecked(&self.inner[start..=end])});
+                    table.push(kind, self.save_str(start, end));
                     self.position += 1;
                 } else {
                     let (kind, start, end) = self.scan_identify()?;
-                    table.push(kind, unsafe {str::from_utf8_unchecked(&self.inner[start..=end])});
+                    table.push(kind, self.save_str(start, end));
                     self.position += 1;
                 }
             } else if (char_class & C_SYM) != 0 {
                 self.scan_symbol(&mut *table)?;
             } else if (char_class & C_QUO) != 0 {
                 let (kind, start, end) = self.scan_string(c)?;
-                table.push(kind, unsafe {str::from_utf8_unchecked(&self.inner[start..=end])});
+                table.push(kind, self.save_str(start, end));
                 self.position += 1;
             } else {
                 table.push(
                     TokenKind::Unknown,
-                    unsafe {str::from_utf8_unchecked(&self.inner[self.position..=self.position])},
+                    self.save_str(self.position, self.position),
                 );
                 self.position += 1;
             }
