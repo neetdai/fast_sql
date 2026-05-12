@@ -50,6 +50,7 @@ impl<'a> SelectStatement<'a> {
                 Some(TokenKind::Comma) => {
                     *cursor += 1;
                 }
+                Some(TokenKind::Delimiter | TokenKind::RightParen) => break,
                 Some(TokenKind::Keyword(Keyword::Case)) | Some(TokenKind::Keyword(Keyword::True)) | Some(TokenKind::Keyword(Keyword::False)) | Some(TokenKind::Keyword(Keyword::Null)) => {
                     let expr = Alias::new(token_table, cursor)?;
                     columns.push(expr);
@@ -80,6 +81,9 @@ impl<'a> SelectStatement<'a> {
                     }
                     None => break,
                 }
+            }
+            if list.is_empty() {
+                return Err(ParserError::SyntaxError(*cursor, *cursor));
             }
             Some(list)
         } else {
