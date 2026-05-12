@@ -46,8 +46,26 @@ impl<'a> Order<'a> {
 
         let mut columns = MiniVec::new();
         loop {
+            let is_clause_kw = matches!(
+                token_table.get_kind(*cursor),
+                Some(TokenKind::Keyword(
+                    Keyword::Where
+                        | Keyword::Group
+                        | Keyword::Having
+                        | Keyword::Order
+                        | Keyword::Limit
+                        | Keyword::From
+                )) | Some(TokenKind::RightParen | TokenKind::Delimiter)
+                | None
+            );
+            if is_clause_kw {
+                break;
+            }
             match token_table.get_kind(*cursor) {
-                Some(TokenKind::Identifier) => {
+                Some(TokenKind::Comma) => {
+                    *cursor += 1;
+                }
+                Some(_) => {
                     let expr = Expr::build(token_table, cursor)?;
                     let direction =
                         if maybe_kind(token_table, cursor, &TokenKind::Keyword(Keyword::Asc)) {
@@ -89,15 +107,15 @@ impl<'a> Order<'a> {
                         nulls_order,
                     });
                 }
-                Some(TokenKind::Comma) => {
-                    *cursor += 1;
-                }
                 _ => {
                     break;
                 }
             }
         }
 
+        if columns.is_empty() {
+            return Err(ParserError::SyntaxError(*cursor, *cursor));
+        }
         Ok(Order { columns })
     }
 }

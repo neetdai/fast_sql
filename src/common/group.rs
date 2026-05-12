@@ -24,13 +24,28 @@ impl<'a> Group<'a> {
 
         let mut columns = MiniVec::new();
         loop {
+            let is_clause_kw = matches!(
+                token_table.get_kind(*cursor),
+                Some(TokenKind::Keyword(
+                    Keyword::Where
+                        | Keyword::Group
+                        | Keyword::Having
+                        | Keyword::Order
+                        | Keyword::Limit
+                        | Keyword::From
+                )) | Some(TokenKind::RightParen | TokenKind::Delimiter)
+                | None
+            );
+            if is_clause_kw {
+                break;
+            }
             match token_table.get_kind(*cursor) {
-                Some(TokenKind::Identifier) => {
-                    let expr = Expr::build(token_table, cursor)?;
-                    columns.push(expr);
-                }
                 Some(TokenKind::Comma) => {
                     *cursor += 1;
+                }
+                Some(_) => {
+                    let expr = Expr::build(token_table, cursor)?;
+                    columns.push(expr);
                 }
                 _ => {
                     break;
