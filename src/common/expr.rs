@@ -1,5 +1,3 @@
-use std::borrow::Cow;
-
 use minivec::MiniVec;
 
 use crate::{
@@ -291,6 +289,26 @@ impl<'a> PrattParserTrait<'a> for Expr<'a> {
             Some(TokenKind::GreaterEqual) => {
                 *cursor += 1;
                 Some(BinaryOperator::GreaterEqual)
+            }
+            Some(TokenKind::BitAnd) => {
+                *cursor += 1;
+                Some(BinaryOperator::BitAnd)
+            }
+            Some(TokenKind::Or) => {
+                *cursor += 1;
+                Some(BinaryOperator::Or)
+            }
+            Some(TokenKind::BitXor) => {
+                *cursor += 1;
+                Some(BinaryOperator::BitXor)
+            }
+            Some(TokenKind::LeftShift) => {
+                *cursor += 1;
+                Some(BinaryOperator::LeftShift)
+            }
+            Some(TokenKind::RightShift) => {
+                *cursor += 1;
+                Some(BinaryOperator::RightShift)
             }
             Some(TokenKind::Keyword(Keyword::And)) => {
                 *cursor += 1;
@@ -904,7 +922,7 @@ mod test {
         common::{
             alias::Alias,
             expr::{
-                BinaryOp, BinaryOperator, Expr, Field, FunctionCall, IsNull, NumericLiteral, Star,
+                BinaryOp, BinaryOperator, Expr, Field, FunctionCall, NumericLiteral, Star,
                 StringLiteral,
             },
         },
