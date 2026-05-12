@@ -194,8 +194,6 @@ impl<'a> From<'a> {
 
 #[cfg(test)]
 mod tests {
-    use std::borrow::Cow;
-
     use super::*;
     use crate::common::expr::{BinaryOp, BinaryOperator, Field};
     use crate::token::TokenKind;
