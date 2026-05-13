@@ -167,6 +167,69 @@ fn parse_select_with_full_join() {
 }
 
 #[test]
+fn parse_select_with_natural_join() {
+    let p = Parser::new().expect("failed to initialize Parser");
+    let sql = "SELECT * FROM users NATURAL JOIN orders";
+    assert!(p.parse(sql).is_ok(), "SELECT with NATURAL JOIN should parse");
+}
+
+#[test]
+fn parse_select_with_natural_left_join() {
+    let p = Parser::new().expect("failed to initialize Parser");
+    let sql = "SELECT * FROM users NATURAL LEFT JOIN orders";
+    assert!(p.parse(sql).is_ok(), "SELECT with NATURAL LEFT JOIN should parse");
+}
+
+#[test]
+fn parse_select_with_natural_right_join() {
+    let p = Parser::new().expect("failed to initialize Parser");
+    let sql = "SELECT * FROM users NATURAL RIGHT JOIN orders";
+    assert!(p.parse(sql).is_ok(), "SELECT with NATURAL RIGHT JOIN should parse");
+}
+
+#[test]
+fn parse_select_with_natural_full_join() {
+    let p = Parser::new().expect("failed to initialize Parser");
+    let sql = "SELECT * FROM users NATURAL FULL JOIN orders";
+    assert!(p.parse(sql).is_ok(), "SELECT with NATURAL FULL JOIN should parse");
+}
+
+#[test]
+fn parse_select_with_join_using() {
+    let p = Parser::new().expect("failed to initialize Parser");
+    let sql = "SELECT * FROM users JOIN orders USING (user_id)";
+    assert!(p.parse(sql).is_ok(), "SELECT with JOIN ... USING should parse");
+}
+
+#[test]
+fn parse_select_with_join_using_multiple() {
+    let p = Parser::new().expect("failed to initialize Parser");
+    let sql = "SELECT * FROM users JOIN orders USING (user_id, order_id)";
+    assert!(p.parse(sql).is_ok(), "SELECT with JOIN ... USING (multiple columns) should parse");
+}
+
+#[test]
+fn parse_select_with_left_join_using() {
+    let p = Parser::new().expect("failed to initialize Parser");
+    let sql = "SELECT * FROM users LEFT JOIN orders USING (id)";
+    assert!(p.parse(sql).is_ok(), "SELECT with LEFT JOIN ... USING should parse");
+}
+
+#[test]
+fn parse_select_with_right_join_using() {
+    let p = Parser::new().expect("failed to initialize Parser");
+    let sql = "SELECT * FROM users RIGHT JOIN orders USING (id)";
+    assert!(p.parse(sql).is_ok(), "SELECT with RIGHT JOIN ... USING should parse");
+}
+
+#[test]
+fn parse_select_with_full_join_using() {
+    let p = Parser::new().expect("failed to initialize Parser");
+    let sql = "SELECT * FROM users FULL JOIN orders USING (id)";
+    assert!(p.parse(sql).is_ok(), "SELECT with FULL JOIN ... USING should parse");
+}
+
+#[test]
 fn parse_select_with_field_alias() {
     let p = Parser::new().expect("failed to initialize Parser");
     let sql = "SELECT first_name AS name FROM employees";
