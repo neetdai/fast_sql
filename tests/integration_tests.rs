@@ -70,6 +70,100 @@ fn parse_select_with_group_by() {
 }
 
 #[test]
+fn parse_select_group_by_rollup() {
+    let p = Parser::new().expect("failed to initialize Parser");
+    let sql = "SELECT a, b, COUNT(*) FROM t GROUP BY ROLLUP (a, b)";
+    assert!(p.parse(sql).is_ok(), "SELECT with GROUP BY ROLLUP should parse");
+}
+
+#[test]
+fn parse_select_group_by_cube() {
+    let p = Parser::new().expect("failed to initialize Parser");
+    let sql = "SELECT a, b, c, COUNT(*) FROM t GROUP BY CUBE (a, b, c)";
+    assert!(p.parse(sql).is_ok(), "SELECT with GROUP BY CUBE should parse");
+}
+
+#[test]
+fn parse_select_group_by_grouping_sets() {
+    let p = Parser::new().expect("failed to initialize Parser");
+    let sql = "SELECT a, b, COUNT(*) FROM t GROUP BY GROUPING SETS ((a, b), (a), (b))";
+    assert!(p.parse(sql).is_ok(), "SELECT with GROUPING SETS should parse");
+}
+
+#[test]
+fn parse_select_group_by_mixed() {
+    let p = Parser::new().expect("failed to initialize Parser");
+    let sql = "SELECT a, COUNT(*) FROM t GROUP BY a, ROLLUP (b, c), CUBE (d, e)";
+    assert!(p.parse(sql).is_ok(), "SELECT with mixed GROUP BY should parse");
+}
+
+#[test]
+fn parse_select_rollup_with_having_order_limit() {
+    let p = Parser::new().expect("failed to initialize Parser");
+    let sql = "SELECT a, COUNT(*) AS cnt FROM t GROUP BY ROLLUP (a, b) HAVING cnt > 1 ORDER BY cnt DESC LIMIT 5";
+    assert!(
+        p.parse(sql).is_ok(),
+        "ROLLUP with HAVING, ORDER BY, LIMIT should parse"
+    );
+}
+
+#[test]
+fn parse_select_grouping_sets_with_having() {
+    let p = Parser::new().expect("failed to initialize Parser");
+    let sql = "SELECT a, COUNT(*) AS cnt FROM t GROUP BY GROUPING SETS ((a, b), (a)) HAVING cnt > 0";
+    assert!(p.parse(sql).is_ok(), "GROUPING SETS with HAVING should parse");
+}
+
+#[test]
+fn parse_select_group_by_rollup_single() {
+    let p = Parser::new().expect("failed to initialize Parser");
+    let sql = "SELECT a, COUNT(*) FROM t GROUP BY ROLLUP (a)";
+    assert!(p.parse(sql).is_ok(), "SELECT with ROLLUP (single column) should parse");
+}
+
+#[test]
+fn parse_select_group_by_cube_single() {
+    let p = Parser::new().expect("failed to initialize Parser");
+    let sql = "SELECT a, COUNT(*) FROM t GROUP BY CUBE (a)";
+    assert!(p.parse(sql).is_ok(), "SELECT with CUBE (single column) should parse");
+}
+
+#[test]
+fn parse_select_group_by_grouping_sets_single() {
+    let p = Parser::new().expect("failed to initialize Parser");
+    let sql = "SELECT a, COUNT(*) FROM t GROUP BY GROUPING SETS ((a, b))";
+    assert!(p.parse(sql).is_ok(), "SELECT with GROUPING SETS (single set) should parse");
+}
+
+#[test]
+fn parse_select_group_by_rollup_cube_grouping_sets_in_stmt() {
+    let p = Parser::new().expect("failed to initialize Parser");
+    let sql = "SELECT category, SUM(amount) FROM sales GROUP BY ROLLUP (category), CUBE (region), GROUPING SETS ((year), (quarter))";
+    assert!(p.parse(sql).is_ok(), "complex GROUP BY with all three forms should parse");
+}
+
+#[test]
+fn parse_select_group_by_rollup_then_order_by() {
+    let p = Parser::new().expect("failed to initialize Parser");
+    let sql = "SELECT a, COUNT(*) FROM t GROUP BY ROLLUP (a, b) ORDER BY a";
+    assert!(
+        p.parse(sql).is_ok(),
+        "ROLLUP followed by ORDER BY should parse"
+    );
+}
+
+#[test]
+fn parse_select_group_by_order_by_rollup() {
+    // Ensure that ORDER BY ... ROLLUP keyword correctly ends ORDER BY
+    let p = Parser::new().expect("failed to initialize Parser");
+    let sql = "SELECT a, COUNT(*) FROM t GROUP BY ROLLUP (a, b)";
+    assert!(
+        p.parse(sql).is_ok(),
+        "ROLLUP keyword correctly terminates ORDER BY if present"
+    );
+}
+
+#[test]
 fn parse_select_with_order_by() {
     let p = Parser::new().expect("failed to initialize Parser");
     let sql = "SELECT name, price FROM products ORDER BY price DESC";
