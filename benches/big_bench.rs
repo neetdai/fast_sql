@@ -1,10 +1,10 @@
 use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
-use mimalloc::MiMalloc;
+// use mimalloc::MiMalloc;
 use simd_sql::Parser;
 use std::hint::black_box;
 
-#[global_allocator]
-static GLOBAL: MiMalloc = MiMalloc;
+// #[global_allocator]
+// static GLOBAL: MiMalloc = MiMalloc;
 
 fn criterion_benchmark(c: &mut Criterion) {
     let mut group = c.benchmark_group("sql parser 1");
@@ -56,6 +56,19 @@ fn criterion_benchmark(c: &mut Criterion) {
     group.bench_with_input(
         BenchmarkId::new("big sql parser 4", sql_len_4),
         &sql_4,
+        |b, i| {
+            b.iter(|| {
+                parser.parse(black_box(&i)).unwrap();
+            });
+        },
+    );
+
+    let sql_5 = "insert into a (user_id, user_name, email) values (123, 'John Doe', 'john@example.com');";
+    let sql_len_5 = sql_5.len();
+    group.throughput(Throughput::Elements(sql_len_5 as u64));
+    group.bench_with_input(
+        BenchmarkId::new("big sql parser 5", sql_len_5),
+        &sql_5,
         |b, i| {
             b.iter(|| {
                 parser.parse(black_box(&i)).unwrap();
