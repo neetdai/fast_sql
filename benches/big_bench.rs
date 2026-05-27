@@ -49,6 +49,19 @@ fn criterion_benchmark(c: &mut Criterion) {
             });
         },
     );
+
+    let sql_4 = "insert into a (user_id, user_name, email) values (123, 'John Doe', 'john@example.com');".repeat(100000);
+    let sql_len_4 = sql_4.len();
+    group.throughput(Throughput::Elements(sql_len_4 as u64));
+    group.bench_with_input(
+        BenchmarkId::new("big sql parser 4", sql_len_4),
+        &sql_4,
+        |b, i| {
+            b.iter(|| {
+                parser.parse(black_box(&i)).unwrap();
+            });
+        },
+    );
 }
 
 criterion_group!(benches, criterion_benchmark);
