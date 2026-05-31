@@ -9,10 +9,14 @@ thiserror = "2.0.17"
 minivec = "0.5.0"
 strum = {version = "0.27.2", features = ["derive"]}
 aho-corasick = "1.1.4"
+serde = {version = "1.0.228", optional = true}
 
 [dev-dependencies]
 criterion = {version = "0.7.0", features = ["html_reports"]}
 mimalloc = "0.1.50"
+
+[features]
+serde = ["dep:serde"]
 
 [[bench]]
 name = "parser_bench"

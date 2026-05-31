@@ -1,7 +1,6 @@
 use minivec::MiniVec;
 
 use crate::{
-    ParserError,
     common::{
         alias::{Alias, Aliasable},
         expr::Expr,
@@ -13,7 +12,11 @@ use crate::{
     },
     keyword::Keyword,
     token::{TokenKind, TokenTable},
+    ParserError,
 };
+
+#[cfg(feature = "serde")]
+use serde::{ser::SerializeStruct, Serialize, Serializer};
 
 #[derive(Debug, PartialEq)]
 pub struct SelectStatement<'a> {
@@ -27,8 +30,24 @@ pub struct SelectStatement<'a> {
     pub limit: Option<Limit<'a>>,
 }
 
+#[cfg(feature = "serde")]
+impl<'a> Serialize for SelectStatement<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("SelectStatement", 8)?;
+        s.serialize_field("distinct", &self.distinct)?;
+
+        s.end()
+    }
+}
+
 impl<'a> SelectStatement<'a> {
-    pub(crate) fn new(token_table: &TokenTable<'a>, cursor: &mut usize) -> Result<Self, ParserError> {
+    pub(crate) fn new(
+        token_table: &TokenTable<'a>,
+        cursor: &mut usize,
+    ) -> Result<Self, ParserError> {
         Self::build_ast(token_table, cursor)
     }
 
@@ -51,11 +70,16 @@ impl<'a> SelectStatement<'a> {
                     *cursor += 1;
                 }
                 Some(TokenKind::Delimiter | TokenKind::RightParen) => break,
-                Some(TokenKind::Keyword(Keyword::Case)) | Some(TokenKind::Keyword(Keyword::True)) | Some(TokenKind::Keyword(Keyword::False)) | Some(TokenKind::Keyword(Keyword::Null)) => {
+                Some(TokenKind::Keyword(Keyword::Case))
+                | Some(TokenKind::Keyword(Keyword::True))
+                | Some(TokenKind::Keyword(Keyword::False))
+                | Some(TokenKind::Keyword(Keyword::Null)) => {
                     let expr = Alias::new(token_table, cursor)?;
                     columns.push(expr);
                 }
-                Some(TokenKind::Keyword(Keyword::If)) if let Some(TokenKind::LeftParen) = token_table.get_kind(*cursor + 1) => {
+                Some(TokenKind::Keyword(Keyword::If))
+                    if let Some(TokenKind::LeftParen) = token_table.get_kind(*cursor + 1) =>
+                {
                     let expr = Alias::new(token_table, cursor)?;
                     columns.push(expr);
                 }
