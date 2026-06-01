@@ -13,6 +13,11 @@ use crate::{
     token::{TokenKind, TokenTable},
 };
 
+#[cfg(feature = "serde")]
+use serde::{
+    ser::{Serialize, Serializer, SerializeStruct},
+};
+
 #[derive(Debug, PartialEq)]
 pub enum BinaryOperator {
     Add,
@@ -98,11 +103,57 @@ impl PrecedenceTrait for BinaryOperator {
     }
 }
 
+#[cfg(feature = "serde")]
+impl Serialize for BinaryOperator {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            Self::Add => serializer.serialize_unit_variant("BinaryOperator", 0, "Add"),
+            Self::Subtract => serializer.serialize_unit_variant("BinaryOperator", 1, "Subtract"),
+            Self::Multiply => serializer.serialize_unit_variant("BinaryOperator", 2, "Multiply"),
+            Self::Divide => serializer.serialize_unit_variant("BinaryOperator", 3, "Divide"),
+            Self::Mod => serializer.serialize_unit_variant("BinaryOperator", 4, "Mod"),
+            Self::Equal => serializer.serialize_unit_variant("BinaryOperator", 5, "Equal"),
+            Self::NotEqual => serializer.serialize_unit_variant("BinaryOperator", 6, "NotEqual"),
+            Self::Less => serializer.serialize_unit_variant("BinaryOperator", 7, "Less"),
+            Self::LessEqual => serializer.serialize_unit_variant("BinaryOperator", 8, "LessEqual"),
+            Self::Greater => serializer.serialize_unit_variant("BinaryOperator", 9, "Greater"),
+            Self::GreaterEqual => serializer.serialize_unit_variant("BinaryOperator", 10, "GreaterEqual"),
+            Self::BitAnd => serializer.serialize_unit_variant("BinaryOperator", 11, "BitAnd"),
+            Self::BitXor => serializer.serialize_unit_variant("BinaryOperator", 12, "BitXor"),
+            Self::LeftShift => serializer.serialize_unit_variant("BinaryOperator", 13, "LeftShift"),
+            Self::RightShift => serializer.serialize_unit_variant("BinaryOperator", 14, "RightShift"),
+            Self::And => serializer.serialize_unit_variant("BinaryOperator", 15, "And"),
+            Self::Or => serializer.serialize_unit_variant("BinaryOperator", 16, "Or"),
+            Self::Between => serializer.serialize_unit_variant("BinaryOperator", 17, "Between"),
+            Self::In => serializer.serialize_unit_variant("BinaryOperator", 18, "In"),
+            Self::Like => serializer.serialize_unit_variant("BinaryOperator", 19, "Like"),
+            Self::Not => serializer.serialize_unit_variant("BinaryOperator", 20, "Not"),
+        }
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct BinaryOp<'a> {
     pub op: BinaryOperator,
     pub left: Expr<'a>,
     pub right: Expr<'a>,
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for BinaryOp<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("BinaryOp", 3)?;
+        s.serialize_field("op", &self.op)?;
+        s.serialize_field("left", &self.left)?;
+        s.serialize_field("right", &self.right)?;
+        s.end()
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -172,6 +223,32 @@ impl<'a> Expr<'a> {
         cursor: &mut usize,
     ) -> Result<Self, ParserError> {
         Self::parse_expression(token_table, cursor)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for Expr<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            Self::Field(field) => serializer.serialize_newtype_variant("Expr", 0, "Field", field),
+            Self::Star(star) => serializer.serialize_newtype_variant("Expr", 1, "Star", star),
+            Self::FunctionCall(func) => serializer.serialize_newtype_variant("Expr", 2, "FunctionCall", func),
+            Self::StringLiteral(string_literal) => serializer.serialize_newtype_variant("Expr", 3, "StringLiteral", string_literal),
+            Self::NumericLiteral(numeric_literal) => serializer.serialize_newtype_variant("Expr", 4, "NumericLiteral", numeric_literal),
+            Self::BinaryOp(binary_op) => serializer.serialize_newtype_variant("Expr", 5, "BinaryOp", binary_op),
+            Self::Between(between) => serializer.serialize_newtype_variant("Expr", 6, "Between", between),
+            Self::In(in_expr) => serializer.serialize_newtype_variant("Expr", 7, "In", in_expr),
+            Self::Case(case_expr) => serializer.serialize_newtype_variant("Expr", 8, "Case", case_expr),
+            Self::Like(like_expr) => serializer.serialize_newtype_variant("Expr", 9, "Like", like_expr),
+            Self::IsNull(is_null) => serializer.serialize_newtype_variant("Expr", 10, "IsNull", is_null),
+            Self::Exists(exists_expr) => serializer.serialize_newtype_variant("Expr", 11, "Exists", exists_expr),
+            Self::BoolLiteral(bool_literal) => serializer.serialize_newtype_variant("Expr", 12, "BoolLiteral", bool_literal),
+            Self::NullLiteral => serializer.serialize_newtype_variant("Expr", 13, "NullLiteral", &()),
+            Self::WindowFunction(window_function) => serializer.serialize_newtype_variant("Expr", 14, "WindowFunction", window_function),
+        }
     }
 }
 
@@ -477,6 +554,19 @@ impl<'a> Field<'a> {
     }
 }
 
+#[cfg(feature = "serde")]
+impl<'a> Serialize for Field<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("Field", 2)?;
+        s.serialize_field("prefix", &self.prefix)?;
+        s.serialize_field("name", &self.name)?;
+        s.end()
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct Star<'a> {
     pub prefix: Option<&'a str>,
@@ -516,6 +606,18 @@ impl<'a> Star<'a> {
         } else {
             Err(ParserError::SyntaxError(*cursor, *cursor))
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for Star<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("Star", 1)?;
+        s.serialize_field("prefix", &self.prefix)?;
+        s.end()
     }
 }
 
@@ -590,6 +692,20 @@ impl<'a> FunctionCall<'a> {
     }
 }
 
+#[cfg(feature = "serde")]
+impl<'a> Serialize for FunctionCall<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("FunctionCall", 3)?;
+        s.serialize_field("name", &self.name)?;
+        s.serialize_field("args", &self.args)?;
+        s.serialize_field("distinct", &self.distinct)?;
+        s.end()
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct StringLiteral<'a> {
     pub value: &'a str,
@@ -610,6 +726,18 @@ impl<'a> StringLiteral<'a> {
     }
 }
 
+#[cfg(feature = "serde")]
+impl<'a> Serialize for StringLiteral<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("StringLiteral", 1)?;
+        s.serialize_field("value", &self.value)?;
+        s.end()
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct NumericLiteral<'a> {
     pub value: &'a str,
@@ -627,6 +755,18 @@ impl<'a> NumericLiteral<'a> {
         } else {
             Err(ParserError::SyntaxError(*cursor, *cursor))
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for NumericLiteral<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("NumericLiteral", 1)?;
+        s.serialize_field("value", &self.value)?;
+        s.end()
     }
 }
 
@@ -664,6 +804,21 @@ impl<'a> Between<'a> {
     }
 }
 
+#[cfg(feature = "serde")]
+impl<'a> Serialize for Between<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("Between", 4)?;
+        s.serialize_field("is_not", &self.is_not)?;
+        s.serialize_field("field", &self.field)?;
+        s.serialize_field("lower", &self.lower)?;
+        s.serialize_field("upper", &self.upper)?;
+        s.end()
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct In<'a> {
     pub is_not: bool,
@@ -671,10 +826,38 @@ pub struct In<'a> {
     pub in_value: InValue<'a>,
 }
 
+#[cfg(feature = "serde")]
+impl<'a> Serialize for In<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("In", 3)?;
+        s.serialize_field("is_not", &self.is_not)?;
+        s.serialize_field("field", &self.field)?;
+        s.serialize_field("in_value", &self.in_value)?;
+        s.end()
+    }
+}
+
+
 #[derive(Debug, PartialEq)]
 pub enum InValue<'a> {
     List(MiniVec<Expr<'a>>),
     Subquery(SubSelectStatement<'a>),
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for InValue<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            InValue::List(values) => serializer.serialize_newtype_variant("InValue", 0, "List", values),
+            InValue::Subquery(subquery) => serializer.serialize_newtype_variant("InValue", 1, "Subquery", subquery),
+        }
+    }
 }
 
 impl<'a> In<'a> {
@@ -759,10 +942,37 @@ impl<'a> Like<'a> {
     }
 }
 
+#[cfg(feature = "serde")]
+impl<'a> Serialize for Like<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("Like", 3)?;
+        s.serialize_field("is_not", &self.is_not)?;
+        s.serialize_field("field", &self.field)?;
+        s.serialize_field("pattern", &self.pattern)?;
+        s.end()
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct IsNull<'a> {
     pub is_not: bool,
     pub field: Box<Expr<'a>>,
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for IsNull<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("IsNull", 2)?;
+        s.serialize_field("is_not", &self.is_not)?;
+        s.serialize_field("field", &self.field)?;
+        s.end()
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -788,6 +998,19 @@ impl<'a> ExistsExpr<'a> {
             is_not,
             subquery: Box::new(select_stmt),
         })
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for ExistsExpr<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("ExistsExpr", 2)?;
+        s.serialize_field("is_not", &self.is_not)?;
+        s.serialize_field("subquery", &self.subquery)?;
+        s.end()
     }
 }
 
@@ -848,10 +1071,36 @@ impl<'a> WindowSpec<'a> {
     }
 }
 
+#[cfg(feature = "serde")]
+impl<'a> Serialize for WindowSpec<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("WindowSpec", 2)?;
+        s.serialize_field("partition_by", &self.partition_by)?;
+        s.serialize_field("order_by", &self.order_by)?;
+        s.end()
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct WindowFunction<'a> {
     pub function: FunctionCall<'a>,
     pub window_spec: WindowSpec<'a>,
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for WindowFunction<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("WindowFunction", 2)?;
+        s.serialize_field("function", &self.function)?;
+        s.serialize_field("window_spec", &self.window_spec)?;
+        s.end()
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -865,6 +1114,19 @@ pub struct CaseExpr<'a> {
 pub struct WhenClause<'a> {
     pub condition: Box<Expr<'a>>,
     pub result: Box<Expr<'a>>,
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for WhenClause<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("WhenClause", 2)?;
+        s.serialize_field("condition", &self.condition)?;
+        s.serialize_field("result", &self.result)?;
+        s.end()
+    }
 }
 
 impl<'a> CaseExpr<'a> {
@@ -916,6 +1178,20 @@ impl<'a> CaseExpr<'a> {
             when_clauses,
             else_result,
         })
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for CaseExpr<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("CaseExpr", 3)?;
+        s.serialize_field("condition", &self.condition)?;
+        s.serialize_field("when_clauses", &self.when_clauses)?;
+        s.serialize_field("else_result", &self.else_result)?;
+        s.end()
     }
 }
 

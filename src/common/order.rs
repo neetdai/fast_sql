@@ -10,10 +10,28 @@ use crate::{
     token::{TokenKind, TokenTable},
 };
 
+#[cfg(feature = "serde")]
+use serde::{
+    ser::{Serialize, Serializer, SerializeStruct},
+};
+
 #[derive(Debug, PartialEq)]
 pub enum OrderDirection {
     ASC,
     DESC,
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for OrderDirection {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            OrderDirection::ASC => serializer.serialize_unit_variant("OrderDirection", 0, "ASC"),
+            OrderDirection::DESC => serializer.serialize_unit_variant("OrderDirection", 1, "DESC"),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -22,11 +40,38 @@ pub enum NullsOrder {
     Last,
 }
 
+#[cfg(feature = "serde")]
+impl Serialize for NullsOrder {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            NullsOrder::First => serializer.serialize_unit_variant("NullsOrder", 0, "First"),
+            NullsOrder::Last => serializer.serialize_unit_variant("NullsOrder", 1, "Last"),
+        }
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct OrderItem<'a> {
     pub expr: Expr<'a>,
     pub direction: OrderDirection,
     pub nulls_order: Option<NullsOrder>,
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for OrderItem<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("OrderItem", 3)?;
+        s.serialize_field("expr", &self.expr)?;
+        s.serialize_field("direction", &self.direction)?;
+        s.serialize_field("nulls_order", &self.nulls_order)?;
+        s.end()
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -120,5 +165,17 @@ impl<'a> Order<'a> {
             return Err(ParserError::SyntaxError(*cursor, *cursor));
         }
         Ok(Order { columns })
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for Order<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("Order", 1)?;
+        s.serialize_field("columns", &self.columns)?;
+        s.end()
     }
 }
