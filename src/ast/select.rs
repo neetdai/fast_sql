@@ -38,7 +38,13 @@ impl<'a> Serialize for SelectStatement<'a> {
     {
         let mut s = serializer.serialize_struct("SelectStatement", 8)?;
         s.serialize_field("distinct", &self.distinct)?;
-
+        s.serialize_field("columns", &self.columns)?;
+        s.serialize_field("from", &self.from)?;
+        s.serialize_field("where_statement", &self.where_statement)?;
+        s.serialize_field("group_by", &self.group_by)?;
+        s.serialize_field("having_statement", &self.having_statement)?;
+        s.serialize_field("order_by", &self.order_by)?;
+        s.serialize_field("limit", &self.limit)?;
         s.end()
     }
 }
