@@ -5,6 +5,9 @@ use crate::{
     token::{TokenKind, TokenTable},
 };
 
+#[cfg(feature = "serde")]
+use serde::{ser::SerializeStruct, Serialize, Serializer};
+
 #[derive(Debug, PartialEq)]
 pub struct Limit<'a> {
     pub offset: Option<Expr<'a>>,
@@ -61,5 +64,18 @@ impl<'a> Limit<'a> {
             }
             _ => Err(ParserError::SyntaxError(*cursor, *cursor)),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for Limit<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("Limit", 2)?;
+        s.serialize_field("offset", &self.offset)?;
+        s.serialize_field("limit", &self.limit)?;
+        s.end()
     }
 }

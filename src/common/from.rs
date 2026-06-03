@@ -6,6 +6,9 @@ use crate::{
     token::{TokenKind, TokenTable},
 };
 
+#[cfg(feature = "serde")]
+use serde::{ser::{SerializeStruct, SerializeStructVariant}, Serialize, Serializer};
+
 #[derive(Debug, PartialEq)]
 pub enum Table<'a> {
     Name(Alias<'a, Expr<'a>>),
@@ -38,6 +41,19 @@ impl<'a> Table<'a> {
     }
 }
 
+#[cfg(feature = "serde")]
+impl<'a> Serialize for Table<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            Self::Name(name) => serializer.serialize_newtype_variant("Table", 0, "Name", &name),
+            Self::SubQuery(sub_query) => serializer.serialize_newtype_variant("Table", 1, "SubQuery", &sub_query),
+        }
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub enum JoinType {
     LeftJoin,
@@ -45,6 +61,22 @@ pub enum JoinType {
     InnerJoin,
     CrossJoin,
     FullJoin,
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for JoinType {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            Self::LeftJoin => serializer.serialize_unit_variant("JoinType", 0, "LeftJoin"),
+            Self::RightJoin => serializer.serialize_unit_variant("JoinType", 1, "RightJoin"),
+            Self::InnerJoin => serializer.serialize_unit_variant("JoinType", 2, "InnerJoin"),
+            Self::CrossJoin => serializer.serialize_unit_variant("JoinType", 3, "CrossJoin"),
+            Self::FullJoin => serializer.serialize_unit_variant("JoinType", 4, "FullJoin"),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -348,6 +380,67 @@ impl<'a> From<'a> {
             }
         }
         Ok(current)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for From<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            Self::Table(table) => serializer.serialize_newtype_variant("From", 0, "Table", &table),
+            Self::CrossJoin { left, right } => {
+                let mut sv = serializer.serialize_struct_variant("From", 1, "CrossJoin", 2)?;
+                sv.serialize_field("left", &left)?;
+                sv.serialize_field("right", &right)?;
+                sv.end()
+            }
+            Self::NaturalJoin {left, right, join_type} => {
+                let mut sv = serializer.serialize_struct_variant("From", 2, "NaturalJoin", 3)?;
+                sv.serialize_field("left", &left)?;
+                sv.serialize_field("right", &right)?;
+                sv.serialize_field("join_type", &join_type)?;
+                sv.end()
+            }
+            Self::JoinUsing { left, right, join_type, using } => {
+                let mut sv = serializer.serialize_struct_variant("From", 3, "JoinUsing", 4)?;
+                sv.serialize_field("left", &left)?;
+                sv.serialize_field("right", &right)?;
+                sv.serialize_field("join_type", &join_type)?;
+                sv.serialize_field("using", &using)?;
+                sv.end()
+            }
+            Self::LeftJoin {left, right, condition} => {
+                let mut sv = serializer.serialize_struct_variant("From", 4, "LeftJoin", 3)?;
+                sv.serialize_field("left", &left)?;
+                sv.serialize_field("right", &right)?;
+                sv.serialize_field("condition", &condition)?;
+                sv.end()
+            }
+            Self::RightJoin {left, right, condition} => {
+                let mut sv = serializer.serialize_struct_variant("From", 5, "RightJoin", 3)?;
+                sv.serialize_field("left", &left)?;
+                sv.serialize_field("right", &right)?;
+                sv.serialize_field("condition", &condition)?;
+                sv.end()
+            }
+            Self::InnerJoin {left, right, condition} => {
+                let mut sv = serializer.serialize_struct_variant("From", 6, "InnerJoin", 3)?;
+                sv.serialize_field("left", &left)?;
+                sv.serialize_field("right", &right)?;
+                sv.serialize_field("condition", &condition)?;
+                sv.end()
+            }
+            Self::FullJoin {left, right, condition} => {
+                let mut sv = serializer.serialize_struct_variant("From", 7, "FullJoin", 3)?;
+                sv.serialize_field("left", &left)?;
+                sv.serialize_field("right", &right)?;
+                sv.serialize_field("condition", &condition)?;
+                sv.end()
+            }
+        }
     }
 }
 

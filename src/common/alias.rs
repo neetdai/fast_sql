@@ -5,6 +5,9 @@ use crate::{
     token::{TokenKind, TokenTable},
 };
 
+#[cfg(feature = "serde")]
+use serde::{ser::SerializeStruct, Serialize, Serializer};
+
 pub trait Aliasable<'a>: Sized {
     fn aliasable(token_table: &TokenTable<'a>, cursor: &mut usize) -> Result<Self, ParserError>;
 }
@@ -48,5 +51,18 @@ where
             }
             _ => Ok(Alias { name: None, value }),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'a, T: Serialize> Serialize for Alias<'a, T> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("Alias", 2)?;
+        s.serialize_field("name", &self.name)?;
+        s.serialize_field("value", &self.value)?;
+        s.end()
     }
 }

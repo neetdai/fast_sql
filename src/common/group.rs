@@ -7,12 +7,32 @@ use crate::{
     token::{TokenKind, TokenTable},
 };
 
+#[cfg(feature = "serde")]
+use serde::{
+    ser::{Serialize, Serializer, SerializeStruct},
+};
+
 #[derive(Debug, PartialEq)]
 pub enum GroupByExpr<'a> {
     Simple(Expr<'a>),
     GroupingSets(Vec<Vec<Expr<'a>>>),
     Cube(Vec<Expr<'a>>),
     Rollup(Vec<Expr<'a>>),
+}
+
+#[cfg(feature = "serde")]
+impl<'a> serde::Serialize for GroupByExpr<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            Self::Simple(simple) => serializer.serialize_newtype_variant("GroupByExpr", 0, "Simple", simple),
+            Self::GroupingSets(grouping_sets) => serializer.serialize_newtype_variant("GroupByExpr", 1, "GroupingSets", grouping_sets),
+            Self::Cube(cube) => serializer.serialize_newtype_variant("GroupByExpr", 2, "Cube", cube),
+            Self::Rollup(rollup) => serializer.serialize_newtype_variant("GroupByExpr", 3, "Rollup", rollup),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -161,6 +181,18 @@ impl<'a> Group<'a> {
         }
 
         Ok(Self { columns })
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for Group<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("Group", 1)?;
+        s.serialize_field("columns", &self.columns)?;
+        s.end()
     }
 }
 
