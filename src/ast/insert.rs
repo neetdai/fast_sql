@@ -8,6 +8,9 @@ use crate::{
     }, keyword::Keyword, token::{TokenKind, TokenTable}
 };
 
+#[cfg(feature = "serde")]
+use serde::{ser::{SerializeStruct, SerializeStructVariant}, Serialize, Serializer};
+
 #[derive(Debug, PartialEq)]
 pub enum InsertValue<'a> {
     AllSelect {
@@ -131,6 +134,34 @@ impl<'a> InsertValue<'a> {
     }
 }
 
+#[cfg(feature = "serde")]
+impl<'a> Serialize for InsertValue<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            Self::AllSelect { select } => {
+                let mut s = serializer.serialize_struct_variant("InsertValue", 0, "AllSelect", 1)?;
+                s.serialize_field("select", &select)?;
+                s.end()
+            },
+            Self::PartOfSelect { select, columns } => {
+                let mut s = serializer.serialize_struct_variant("InsertValue", 1, "PartOfSelect", 2)?;
+                s.serialize_field("select", &select)?;
+                s.serialize_field("columns", &columns)?;
+                s.end()
+            },
+            Self::Values { columns, values } => {
+                let mut s = serializer.serialize_struct_variant("InsertValue", 2, "Values", 2)?;
+                s.serialize_field("columns", &columns)?;
+                s.serialize_field("values", &values)?;
+                s.end()
+            }
+        }
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct InsertStatement<'a> {
     pub table: Table<'a>,
@@ -160,5 +191,18 @@ impl<'a> InsertStatement<'a> {
             table,
             insert_value,
         })
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for InsertStatement<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("InsertStatement", 2)?;
+        s.serialize_field("table", &self.table)?;
+        s.serialize_field("insert_value", &self.insert_value)?;
+        s.end()
     }
 }

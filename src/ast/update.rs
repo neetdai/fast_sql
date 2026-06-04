@@ -11,6 +11,9 @@ use crate::{
     token::{TokenKind, TokenTable},
 };
 
+#[cfg(feature = "serde")]
+use serde::{ser::SerializeStruct, Serialize, Serializer};
+
 #[derive(Debug, PartialEq)]
 pub struct UpdateStatement<'a> {
     pub table: From<'a>,
@@ -61,5 +64,19 @@ impl<'a> UpdateStatement<'a> {
             assignments,
             where_statement,
         })
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for UpdateStatement<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("UpdateStatement", 3)?;
+        s.serialize_field("table", &self.table)?;
+        s.serialize_field("assignments", &self.assignments)?;
+        s.serialize_field("where_statement", &self.where_statement)?;
+        s.end()
     }
 }

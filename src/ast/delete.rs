@@ -11,6 +11,9 @@ use crate::{
     token::{TokenKind, TokenTable},
 };
 
+#[cfg(feature = "serde")]
+use serde::{ser::SerializeStruct, Serialize, Serializer};
+
 /// Represents a DELETE statement.
 ///
 /// Supports three syntactic forms:
@@ -94,5 +97,19 @@ impl<'a> DeleteStatement<'a> {
             from,
             conditions,
         })
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for DeleteStatement<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("DeleteStatement", 3)?;
+        s.serialize_field("delete_tables", &self.delete_tables)?;
+        s.serialize_field("from", &self.from)?;
+        s.serialize_field("conditions", &self.conditions)?;
+        s.end()
     }
 }
