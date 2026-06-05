@@ -6,6 +6,9 @@ use crate::{
     SelectStatement,
 };
 
+#[cfg(feature = "serde")]
+use serde::{ser::{SerializeStruct, SerializeStructVariant}, Serialize, Serializer};
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct ColumnConstraint<'a> {
     pub not_null: bool,
@@ -14,12 +17,42 @@ pub struct ColumnConstraint<'a> {
     pub unique: bool,
 }
 
+#[cfg(feature = "serde")]
+impl<'a> Serialize for ColumnConstraint<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("ColumnConstraint", 4)?;
+        s.serialize_field("not_null", &self.not_null)?;
+        s.serialize_field("default", &self.default)?;
+        s.serialize_field("primary_key", &self.primary_key)?;
+        s.serialize_field("unique", &self.unique)?;
+        s.end()
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct ColumnDef<'a> {
     pub name: &'a str,
     pub col_type: &'a str,
     pub col_type_params: Option<&'a str>,
     pub constraint: ColumnConstraint<'a>,
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for ColumnDef<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("ColumnDef", 4)?;
+        s.serialize_field("name", &self.name)?;
+        s.serialize_field("col_type", &self.col_type)?;
+        s.serialize_field("col_type_params", &self.col_type_params)?;
+        s.serialize_field("constraint", &self.constraint)?;
+        s.end()
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -36,11 +69,50 @@ pub enum CreateTable<'a> {
     },
 }
 
+#[cfg(feature = "serde")]
+impl<'a> Serialize for CreateTable<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            Self::Table { if_not_exists, name, columns } => {
+                let mut s = serializer.serialize_struct_variant("CreateTable", 0, "Table", 3)?;
+                s.serialize_field("if_not_exists", if_not_exists)?;
+                s.serialize_field("name", name)?;
+                s.serialize_field("columns", columns)?;
+                s.end()
+            }
+            Self::AsSelect { name, columns, select } => {
+                let mut s = serializer.serialize_struct_variant("CreateTable", 1, "AsSelect", 3)?;
+                s.serialize_field("name", name)?;
+                s.serialize_field("columns", columns)?;
+                s.serialize_field("select", select)?;
+                s.end()
+            }
+        }
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct DropTable<'a> {
     pub if_exists: bool,
     pub names: Vec<&'a str>,
     pub cascade: bool,
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for DropTable<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("DropTable", 3)?;
+        s.serialize_field("if_exists", &self.if_exists)?;
+        s.serialize_field("names", &self.names)?;
+        s.serialize_field("cascade", &self.cascade)?;
+        s.end()
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -59,10 +131,54 @@ pub enum AlterTableOperation<'a> {
     },
 }
 
+#[cfg(feature = "serde")]
+impl<'a> Serialize for AlterTableOperation<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            Self::AddColumn { column } => {
+                let mut s = serializer.serialize_struct_variant("AlterTableOperation", 0, "AddColumn", 1)?;
+                s.serialize_field("column", column)?;
+                s.end()
+            }
+            Self::DropColumn { name, cascade } => {
+                let mut s = serializer.serialize_struct_variant("AlterTableOperation", 1, "DropColumn", 2)?;
+                s.serialize_field("name", name)?;
+                s.serialize_field("cascade", cascade)?;
+                s.end()
+            }
+            Self::RenameTo(name) => {
+                serializer.serialize_newtype_variant("AlterTableOperation", 2, "RenameTo", name)
+            }
+            Self::RenameColumn { old, new } => {
+                let mut s = serializer.serialize_struct_variant("AlterTableOperation", 3, "RenameColumn", 2)?;
+                s.serialize_field("old", old)?;
+                s.serialize_field("new", new)?;
+                s.end()
+            }
+        }
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct AlterTable<'a> {
     pub name: &'a str,
     pub operation: AlterTableOperation<'a>,
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for AlterTable<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("AlterTable", 2)?;
+        s.serialize_field("name", &self.name)?;
+        s.serialize_field("operation", &self.operation)?;
+        s.end()
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -70,6 +186,26 @@ pub enum DdlStatement<'a> {
     CreateTable(CreateTable<'a>),
     DropTable(DropTable<'a>),
     AlterTable(AlterTable<'a>),
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for DdlStatement<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            Self::CreateTable(create_table) => {
+                serializer.serialize_newtype_variant("DdlStatement", 0, "CreateTable", create_table)
+            }
+            Self::DropTable(drop_table) => {
+                serializer.serialize_newtype_variant("DdlStatement", 1, "DropTable", drop_table)
+            }
+            Self::AlterTable(alter_table) => {
+                serializer.serialize_newtype_variant("DdlStatement", 2, "AlterTable", alter_table)
+            }
+        }
+    }
 }
 
 impl<'a> DdlStatement<'a> {

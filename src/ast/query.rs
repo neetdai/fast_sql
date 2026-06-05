@@ -14,6 +14,10 @@ use crate::{
     token::{TokenKind, TokenTable},
 };
 
+#[cfg(feature = "serde")]
+use serde::{ser::{SerializeStruct, SerializeStructVariant}, Serialize, Serializer};
+
+
 #[derive(Debug, PartialEq)]
 pub enum SetOperator {
     Union,
@@ -37,6 +41,21 @@ impl PrecedenceTrait for SetOperator {
 
     fn min_precedence() -> usize {
         1
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for SetOperator {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            Self::Union => serializer.serialize_unit_variant("SetOperator", 0, "Union"),
+            Self::UnionAll => serializer.serialize_unit_variant("SetOperator", 1, "UnionAll"),
+            Self::Intersect => serializer.serialize_unit_variant("SetOperator", 2, "Intersect"),
+            Self::Except => serializer.serialize_unit_variant("SetOperator", 3, "Except"),
+        }
     }
 }
 
@@ -151,6 +170,33 @@ impl<'a> PrattOutput<SetOperator> for Query<'a> {
             right: Box::new(right),
             order_by: None,
             limit: None,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for Query<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            Self::Select(select) => serializer.serialize_newtype_variant("Query", 0, "Select", select),
+            Self::Cte { ctes, query } => {
+                let mut state = serializer.serialize_struct_variant("Query", 1, "Cte", 2)?;
+                state.serialize_field("ctes", ctes)?;
+                state.serialize_field("query", query)?;
+                state.end()
+            }
+            Self::SetOperation { op, left, right, order_by, limit } => {
+                let mut state = serializer.serialize_struct_variant("Query", 2, "SetOperation", 5)?;
+                state.serialize_field("op", op)?;
+                state.serialize_field("left", left)?;
+                state.serialize_field("right", right)?;
+                state.serialize_field("order_by", order_by)?;
+                state.serialize_field("limit", limit)?;
+                state.end()
+            }
         }
     }
 }

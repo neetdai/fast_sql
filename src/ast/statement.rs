@@ -6,6 +6,9 @@ use crate::{
     token::{TokenKind, TokenTable},
 };
 
+#[cfg(feature = "serde")]
+use serde::{ser::{SerializeStruct, SerializeSeq}, Serialize, Serializer};
+
 #[derive(Debug, PartialEq)]
 pub struct Statement<'a> {
     pub list: Vec<StatementInner<'a>>,
@@ -35,6 +38,21 @@ impl<'a> Statement<'a> {
         }
 
         Ok(Self { list })
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for Statement<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let len = self.list.len();
+        let mut seq = serializer.serialize_seq(Some(len))?;
+        for item in &self.list {
+            seq.serialize_element(item)?;
+        }
+        seq.end()
     }
 }
 
@@ -83,6 +101,22 @@ impl<'a> StatementInner<'a> {
                 DdlStatement::build(token_table, cursor).map(Self::Ddl)
             }
             _ => Err(ParserError::SyntaxError(*cursor, *cursor)),
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for StatementInner<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            Self::Query(query) => serializer.serialize_newtype_variant("StatementInner", 0, "Query", query),
+            Self::Insert(insert) => serializer.serialize_newtype_variant("StatementInner", 1, "Insert", insert),
+            Self::Update(update) => serializer.serialize_newtype_variant("StatementInner", 2, "Update", update),
+            Self::Delete(delete) => serializer.serialize_newtype_variant("StatementInner", 3, "Delete", delete),
+            Self::Ddl(ddl) => serializer.serialize_newtype_variant("StatementInner", 4, "Ddl", ddl),
         }
     }
 }

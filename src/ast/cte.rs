@@ -9,6 +9,9 @@ use crate::{
     token::{TokenKind, TokenTable},
 };
 
+#[cfg(feature = "serde")]
+use serde::{ser::SerializeStruct, Serialize, Serializer};
+
 #[derive(Debug, PartialEq)]
 pub struct CteBinding<'a> {
     pub name: &'a  str,
@@ -16,12 +19,26 @@ pub struct CteBinding<'a> {
     pub query: Box<Query<'a>>,
 }
 
+#[cfg(feature = "serde")]
+impl<'a> Serialize for CteBinding<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("CteBinding", 3)?;
+        state.serialize_field("name", &self.name)?;
+        state.serialize_field("columns", &self.columns)?;
+        state.serialize_field("query", &self.query)?;
+        state.end()
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct Cte<'a> {
     pub recursive: bool,
     pub bindings: MiniVec<CteBinding<'a>>,
 }
-
+    
 impl<'a> CteBinding<'a> {
     fn new(token_table: &TokenTable<'a>, cursor: &mut usize) -> Result<Self, ParserError> {
         let name = match token_table.get_kind(*cursor) {
@@ -108,5 +125,18 @@ impl<'a> Cte<'a> {
             recursive,
             bindings,
         })
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'a> Serialize for Cte<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("Cte", 2)?;
+        state.serialize_field("recursive", &self.recursive)?;
+        state.serialize_field("bindings", &self.bindings)?;
+        state.end()
     }
 }
